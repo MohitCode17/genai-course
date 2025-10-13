@@ -15,6 +15,7 @@
 11. [Introduction of Prompt Engineering](#11-introduction-of-prompt-engineering)
 12. [Types of Prompting in LLMs](#12-types-of-prompting-in-llms)
 13. [Invoking the LLM](#13-invoking-the-llm)
+14. [About System Prompt](#14-about-system-prompt)
 
 ---
 
@@ -561,3 +562,37 @@ async function main() {
 
 main();
 ```
+
+---
+
+## 14. About System Prompt
+
+A **System Prompt** is a special message given to an LLM at the start of a conversation to set its **role, behavior, and style**.
+
+```javascript
+messages: [
+  {
+    role: "system",
+    content: "You are Askly, a smart personal assistant.",
+  },
+  {
+    role: "user",
+    content: "Who are you?",
+  },
+];
+```
+
+### Effects of System Prompt
+
+1. **Set Persona:**
+
+   - Example: "Askly, smart personal assistant" → model responds in a friendly, informative, and helpful tone.
+   - Changing the system prompt (e.g., "You are a harsh critic") alters tone and style.
+
+2. **Guide Conversation Context:**
+
+   - The model answers future user questions according to the system prompt's context.
+
+3. **Instruction-Based Control:**
+
+   - Provides task instructions or behavior rules to the model.
