@@ -14,7 +14,7 @@
 10. [Token, Context, Context Window & Inference](#10-token-context-context-window--inference)
 11. [Introduction of Prompt Engineering](#11-introduction-of-prompt-engineering)
 12. [Types of Prompting in LLMs](#12-types-of-prompting-in-llms)
-13. []()
+13. [Invoking the LLM](#13-invoking-the-llm)
 
 ---
 
@@ -439,3 +439,125 @@ Final Answer: ₹200
 ```
 
 ---
+
+## 13. Invoking the LLM
+
+This section explains how to invoke LLMs in your code using **Groq Cloud**, a cloud-based platform providing high-performance AI accelerators and LLMs, so you can run models efficiently without local hardware.
+
+**Analogy:**  
+Groq Cloud acts as an AI “supercomputer” on demand:
+
+- No need to buy a powerful local GPU
+- Simply call the API over the internet → get instant AI output
+
+### Basic Chat Completion API Example:
+
+```javascript
+import Groq from "groq-sdk";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+async function main() {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile", // LLM model to invoke
+    messages: [
+      {
+        role: "user", // roles: "user", "system", "assistant"
+        content: "Hi", // Input text
+      },
+    ],
+  });
+
+  console.log(completion.choices[0].message);
+}
+
+main();
+```
+
+### Understanding the Response Object
+
+```javascript
+{
+  "id": "chatcmpl-xxxx",
+  "object": "chat.completion",
+  "created": 1759940223,
+  "model": "llama-3.3-70b-versatile",
+  "choices": [
+    {
+      "index": 0,
+      "message": { ... },   // Generated message from LLM
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { ... },
+  "system_fingerprint": "fp_xxxx",
+  "x_groq": { "id": "req_xxx" },
+  "service_tier": "on_demand"
+}
+```
+
+**Key Fields:**
+
+- choices: Array of generated outputs
+- finish_reason: "stop" → model finished naturally
+- usage:
+  - queue_time: time spent waiting
+  - prompt_tokens: tokens in input
+  - completion_tokens: tokens in output
+  - total_tokens: input + output tokens
+  - total_time: total request duration
+
+> Always refer to the official documentation, as API responses and invocation methods may change over time.
+
+### An Interview Grade LLM Example:
+
+```javascript
+import Groq from "groq-sdk/index.mjs";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+async function main() {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: `You are an interview grader assistant. Your tast is to generate candidate evaluation score.
+        Output must be following JSON structure:
+        {
+          "confidence": number (1-10 scale),
+          "accuracy": number (1-10 scale),
+          "pass": boolean (true or false),
+        }
+
+        The response must:
+          1. Include ALL fields shown above
+          2. Use only the exact field names shown
+          3. Follow the exact data types specified
+          4. Contain ONLY the JSON object and nothing else 
+        `,
+      },
+      {
+        role: "user",
+        content: `Q: What does === do in JavaScript?
+          A: It checks strict equality-both value and type must match.
+
+          Q: How do you create a promise that resolves after 1 second?
+          A: const p = new Promise(r => setTimeout(r, 1000));
+
+          Q: What is hoisting?
+          A: JavaScript moves declarations (but not initialization) to top of their scope before code runs.
+
+          Q: Why use let instead of var?
+          A: let is block-scoped, avoiding the function-scope quirks and re-declaration issues of var.
+        `,
+      },
+    ],
+  });
+
+  console.log(completion.choices[0].message.content);
+}
+
+main();
+```
