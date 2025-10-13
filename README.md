@@ -12,6 +12,9 @@
 8. [LLM Models and Their Capabilities](#8-llm-models-and-their-capabilities)
 9. [GPT Models VS Reasoning Models](#9-gpt-models-vs-reasoning-models)
 10. [Token, Context, Context Window & Inference](#10-token-context-context-window--inference)
+11. [Introduction of Prompt Engineering](#11-introduction-of-prompt-engineering)
+12. [Types of Prompting in LLMs](#12-types-of-prompting-in-llms)
+13. []()
 
 ---
 
@@ -350,5 +353,89 @@ Example:
 - Output → “The rain in Delhi whispers softly over streets of gold…”
 
 No training happens here — only **prediction** based on learned knowledge.
+
+---
+
+## 11. Introduction of Prompt Engineering
+
+**Prompt engineering** is the process of crafting instructions for AI models (LLMs) so they produce the desired output. Clear, structured, and context-rich prompts lead to more accurate results.
+
+- **Prompt** = input given to the AI model
+- **Prompt engineering** = the art and science of designing effective prompts
+
+### Why Prompt Engineering Matters
+
+Prompt engineering is essential to unlock the full potential of LLMs.
+
+**Key Benefits:**
+
+- Control model behavior (tone, role, style, structure)
+- Produce higher-quality and more accurate outputs
+- Reduce hallucinations (incorrect or fabricated responses)
+- Save tokens, time, and cost by improving efficiency
+- Reuse and adapt good prompts across multiple tasks
+
+Example:
+
+- **Prompt 1:** “Write about Virat Kohli.”
+- **Prompt 2:** “Act as a sports journalist and write a 100-word analytical summary of Virat Kohli’s captaincy style.”
+
+The second prompt is more specific and role-based, so it yields a more focused and controlled output. This is the difference between a plain prompt and an engineered prompt.
+
+---
+
+## 12. Types of Prompting in LLMs
+
+There are three foundational prompting styles: **Zero-Shot**, **Few-Shot**, and **Chain-of-Thought (CoT)**.
+
+### Zero-Shot Prompting
+
+You give the model a task with **no examples**; it relies solely on its training.
+
+**Pros:** Simple, fast, good for general tasks.  
+**Cons:** Can be vague or incorrect on complex tasks.
+
+**Example:**
+
+> Prompt: “Translate to Hindi: ‘AI will change the world.’”  
+> Output: “AI duniya ko badal dega.”
+
+### Few-Shot Prompting
+
+You provide **a few examples (2–5)** in the prompt so the model learns the desired pattern.
+
+**Pros:** Better for structured/custom tasks; reduces hallucination.  
+**Cons:** Longer prompts and higher token cost.
+
+**Example:**
+
+```
+Prompt:
+
+Dog → Kutta
+Cat → Billi
+Book → Kitaab
+Pen → ?
+
+Output: “Kalam”
+```
+
+### Chain-of-Thought (CoT) Prompting
+
+You ask the model to **reason step-by-step** before giving the final answer. Best for multi-step reasoning.
+
+**Pros:** Improves accuracy on math, logic, and complex reasoning; gives explainability.  
+**Cons:** Longer outputs and slower responses.
+
+**Example:**
+
+```
+Prompt: “If 3 apples cost ₹60, how much do 10 apples cost? Think step-by-step.”
+
+Output:
+Step 1: 3 apples = ₹60 → 1 apple = ₹20
+Step 2: 10 apples = 10 × ₹20 = ₹200
+Final Answer: ₹200
+```
 
 ---
