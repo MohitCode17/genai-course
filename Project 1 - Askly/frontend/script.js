@@ -5,6 +5,27 @@ const askBtn = document.querySelector("#ask-btn");
 input.addEventListener("keyup", handleEnter);
 askBtn.addEventListener("click", handleAsk);
 
+async function callServer(message) {
+  try {
+    const response = await fetch(`http://localhost:3001/chat`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error generating LLM response.");
+    }
+
+    const result = await response.json();
+    return result.message;
+  } catch (error) {
+    throw new Error("Something went wrong.");
+  }
+}
+
 async function generate(text) {
   /**
    * 1. Append message to ui
@@ -18,6 +39,15 @@ async function generate(text) {
 
   chatContainer?.appendChild(msg);
   input.value = "";
+
+  // CALL API
+  const botMessage = await callServer(text);
+
+  const botMessageElem = document.createElement("div");
+  botMessageElem.className = `mb-4 bg-neutral-800 max-w-fit p-4 rounded-2xl text-sm shadow-md`;
+  botMessageElem.textContent = botMessage;
+
+  chatContainer?.appendChild(botMessageElem);
 }
 
 async function handleAsk(e) {
