@@ -58,7 +58,7 @@ The main purpose of **Generative AI** is to **enhance productivity and creativit
 A **Neural Network** is a system inspired by how the **human brain** works.  
 It processes information through interconnected nodes called **neurons**.
 
-<img src="./Neural-Networks-Architecture.png" width="400px">
+<img src="./assets/Neural-Networks-Architecture.png" width="400px">
 
 ### 🧩 Structure of a Neural Network
 
@@ -119,7 +119,7 @@ like **GPT (OpenAI)**, **Gemini (Google)**, **Claude (Anthropic)**, and **LLaMA 
 Introduced in 2017 by Google in the paper _“Attention is All You Need”_,  
 Transformers revolutionized how machines understand and generate language.
 
-<img src="./transformer-architecture.png" width="450px">
+<img src="./assets/transformer-architecture.png" width="450px">
 
 ### 🧩 Core Components of a Transformer
 
@@ -772,6 +772,8 @@ main();
 
 **Tool Calling** is a powerful feature in LLMs that allows them to interact with **external resources** such as APIs, databases, or the web.
 
+<img src="./assets/tool-call-flow.png" width="450px">
+
 ### Why Tool Calling is Important
 
 | Use Case                     | Description                                                                      |
@@ -855,3 +857,100 @@ async function webSearch({ query }) {
   return `The current Captain of Indian Text Cricket Team is Shubman Gill.`;
 }
 ```
+
+### Tool Calling: Implement Tool
+
+```javascript
+import Groq from "groq-sdk/index.mjs";
+import { tavily } from "@tavily/core";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
+
+async function main() {
+  const messages = [
+    {
+      role: "system",
+      content: `You are a smart personal assistant who answers the asked questions.
+                  You have access to following tools:
+                  1. webSearch({query}: {query: string}) //Search the latest information and realtime data on the internet.`,
+    },
+    {
+      role: "user",
+      content: `When was iphone 17 launched in india?`,
+    },
+  ];
+
+  while (true) {
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0,
+      messages: messages,
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "webSearch",
+            description:
+              "Search the latest information and realtime data on the internet.",
+            parameters: {
+              type: "object",
+              properties: {
+                query: {
+                  type: "string",
+                  description: "The search query to perform search on.",
+                },
+              },
+              required: ["query"],
+            },
+          },
+        },
+      ],
+      tool_choice: "auto",
+    });
+
+    // WHEN RESULT COMES OF COMPLETION ONE PUSH INTO MESSAGES
+    messages.push(completion.choices[0].message);
+
+    let toolCalls = completion.choices[0].message.tool_calls;
+
+    if (!toolCalls) {
+      console.log(`Assistant: ${completion.choices[0].message.content}`);
+      break;
+    }
+
+    for (const tool of toolCalls) {
+      const functionName = tool.function.name;
+      const functionArgs = tool.function.arguments;
+
+      if (functionName === "webSearch") {
+        const toolResult = await webSearch(JSON.parse(functionArgs));
+
+        // PUSH THE TOOL CALL MESSAGE INTO MESSAGES ARRAY
+        messages.push({
+          tool_call_id: tool.id,
+          role: "tool",
+          name: functionName,
+          content: toolResult,
+        });
+      }
+    }
+  }
+}
+
+main();
+
+async function webSearch({ query }) {
+  console.log("Calling a web search...");
+
+  const response = await tvly.search(query);
+
+  const finalResult = response.results
+    .map((result) => result.content)
+    .join("\n\n");
+
+  return finalResult;
+}
+```
+
+---
