@@ -16,6 +16,7 @@
 12. [Types of Prompting in LLMs](#12-types-of-prompting-in-llms)
 13. [Invoking the LLM](#13-invoking-the-llm)
 14. [About System Prompt](#14-about-system-prompt)
+15. [LLM Settings / Parameters Explained](#15-llm-settings--parameters-explained)
 
 ---
 
@@ -596,3 +597,101 @@ messages: [
 3. **Instruction-Based Control:**
 
    - Provides task instructions or behavior rules to the model.
+
+---
+
+## 15. LLM Settings / Parameters Explained
+
+```javascript
+async function main() {
+  const completion = await groq.chat.completions.create({
+    temperature: 1,
+    top_p: 0.2,
+    stop: "ga",
+    max_completion_tokens: "",
+    model: "llama-3.3-70b-versatile",
+    frequency_penalty: 1,
+    presence_penalty: 1,
+    messages: [...],
+  });
+}
+```
+
+### 1. Temperature
+
+Controls model randomness (0 to 2). Higher → more creative but inconsistent.
+
+| Temperature | Effect                     |
+| ----------- | -------------------------- |
+| 0           | Deterministic, always same |
+| 0.5         | Slight randomness          |
+| 1           | Standard, creative         |
+| >1          | Highly random              |
+
+**Use Cases:**
+
+- `0` → exact answers, classification tasks
+- `0.7-1` → creative writing, marketing content
+- `> 1` → brainstorming, jokes, unpredictable output
+
+### 2. top_p (Nucleus Sampling)
+
+Chooses words from top cumulative probability p.
+
+**Example:**
+
+```
+“I want to eat …”
+```
+
+Next probabilities of model something like that 👇
+
+| Word      | Probability |
+| --------- | ----------- |
+| pizza     | 0.50        |
+| burger    | 0.30        |
+| pasta     | 0.10        |
+| ice-cream | 0.05        |
+| rock      | 0.02        |
+| car       | 0.01        |
+| banana    | 0.01        |
+| others    | 0.01        |
+
+**Use Case:** Controlled randomness for content generation, summarization, chatbots.
+
+### 3. stop
+
+Defines sequences where generation stops.
+
+**Use Cases:**
+
+- Chatbot → "\nUser:"
+- Sentiment classification → single-word output
+- Code generation → stop at `;` or `}`
+
+### 4. max_completion_tokens
+
+Maximum tokens model can generate.
+
+**Use Cases:**
+
+- Short response → 20 tokens
+- Long story → 500+ tokens
+
+### 5. frequency_penalty
+
+Reduces repetition of words/phrases.
+
+- Higher → less repetition
+- Lower → repetition allowed
+
+**Use Cases:** Creative writing, blogs, stories.
+
+### 6. presence_penalty
+
+Penalizes words already appeared, encourages new topics.
+
+- Higher → more new words, less repetition
+- Lower → model may repeat familiar words
+
+---
