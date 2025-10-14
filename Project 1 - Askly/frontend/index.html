@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Askly</title>
+    <style>
+      #chat-container::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+      #chat-container {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body
+    class="bg-neutral-900 text-white h-screen flex flex-col overflow-hidden font-sans"
+  >
+    <!-- HEADER -->
+    <header
+      class="border-b border-neutral-800 bg-neutral-900/60 backdrop-blur-sm"
+    >
+      <div
+        class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <h1 class="text-lg font-semibold tracking-wide">Askly</h1>
+      </div>
+    </header>
+
+    <!-- MAIN CHAT AREA -->
+    <main
+      id="chat-container"
+      class="flex-1 overflow-y-auto px-4 py-6 max-w-6xl w-full mx-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent"
+    >
+      <!-- Example: User Message -->
+
+      <!-- Example: Assistant Message -->
+    </main>
+
+    <!-- INPUT AREA (Sticky Bottom) -->
+    <footer
+      class="border-t border-neutral-800 bg-neutral-900/80 backdrop-blur-md py-4"
+    >
+      <div class="max-w-6xl mx-auto px-4 flex items-end gap-3">
+        <textarea
+          id="prompt-input"
+          rows="1"
+          placeholder="Ask anything..."
+          class="flex-1 resize-none bg-neutral-800 text-white text-sm p-3 rounded-xl border border-neutral-700 focus:outline-none focus:border-neutral-500 placeholder-neutral-500 transition-all"
+        ></textarea>
+
+        <button
+          id="ask-btn"
+          class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium px-5 py-3 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Ask
+        </button>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
