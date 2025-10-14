@@ -17,6 +17,7 @@
 13. [Invoking the LLM](#13-invoking-the-llm)
 14. [About System Prompt](#14-about-system-prompt)
 15. [LLM Settings / Parameters Explained](#15-llm-settings--parameters-explained)
+16. [Structured Output in LLMs](#16-structured-output-in-llms)
 
 ---
 
@@ -512,58 +513,6 @@ main();
 
 > Always refer to the official documentation, as API responses and invocation methods may change over time.
 
-### An Interview Grade LLM Example:
-
-```javascript
-import Groq from "groq-sdk/index.mjs";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-async function main() {
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "system",
-        content: `You are an interview grader assistant. Your tast is to generate candidate evaluation score.
-        Output must be following JSON structure:
-        {
-          "confidence": number (1-10 scale),
-          "accuracy": number (1-10 scale),
-          "pass": boolean (true or false),
-        }
-
-        The response must:
-          1. Include ALL fields shown above
-          2. Use only the exact field names shown
-          3. Follow the exact data types specified
-          4. Contain ONLY the JSON object and nothing else 
-        `,
-      },
-      {
-        role: "user",
-        content: `Q: What does === do in JavaScript?
-          A: It checks strict equality-both value and type must match.
-
-          Q: How do you create a promise that resolves after 1 second?
-          A: const p = new Promise(r => setTimeout(r, 1000));
-
-          Q: What is hoisting?
-          A: JavaScript moves declarations (but not initialization) to top of their scope before code runs.
-
-          Q: Why use let instead of var?
-          A: let is block-scoped, avoiding the function-scope quirks and re-declaration issues of var.
-        `,
-      },
-    ],
-  });
-
-  console.log(completion.choices[0].message.content);
-}
-
-main();
-```
-
 ---
 
 ## 14. About System Prompt
@@ -693,5 +642,127 @@ Penalizes words already appeared, encourages new topics.
 
 - Higher → more new words, less repetition
 - Lower → model may repeat familiar words
+
+---
+
+## 16. Structured Output in LLMs
+
+When we want an LLM to produce output in a specific format or structure (like JSON, key-value pairs, tables, or lists), it’s called **Structured Output**.
+
+Example:
+
+```
+Prompt:
+  “Summarize the below review.”
+  “This phone is great! The camera is amazing and the battery lasts all day.”
+
+Model Output (normal):
+  “The phone has an excellent camera and long battery life. Overall, a great product.”
+```
+
+This output is human-readable but **not machine-readable**.  
+If you need to extract data like sentiment, rating, or pros/cons in the backend, it becomes difficult.
+
+Example (Structured Output):
+
+```
+Prompt:
+“Summarize the review and return JSON with keys: sentiment, pros, cons.”
+
+Model Output (structured):
+{
+  "sentiment": "positive",
+  "pros": ["amazing camera", "long battery life"],
+  "cons": []
+}
+```
+
+This output is **machine-readable**, easy to parse, and can be stored in the backend, APIs, or databases.
+
+---
+
+### How to Get Structured Output
+
+#### 1. Enforce Structure Using a System Prompt
+
+You can explicitly instruct the model: “Always respond in JSON format.”
+
+Example:
+
+```
+{
+role: "system",
+content: `You are a helpful assistant that returns structured data only in JSON format.
+When given a product review, return a JSON object with fields:
+
+sentiment: positive, neutral, or negative
+
+pros: list of positives
+
+cons: list of negatives`
+}
+```
+
+#### 2. JSON Mode (Structured Output via API Parameter)
+
+Platforms like **Groq**, **OpenAI**, and **Anthropic** provide a special parameter:
+
+> response_format: { type: "json_object" }
+
+This enforces the model to strictly return pure JSON output.
+
+---
+
+### Project: An Interview Grade LLM:
+
+```javascript
+import Groq from "groq-sdk/index.mjs";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+async function main() {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: `You are an interview grader assistant. Your tast is to generate candidate evaluation score.
+        Output must be following JSON structure:
+        {
+          "confidence": number (1-10 scale),
+          "accuracy": number (1-10 scale),
+          "pass": boolean (true or false),
+        }
+
+        The response must:
+          1. Include ALL fields shown above
+          2. Use only the exact field names shown
+          3. Follow the exact data types specified
+          4. Contain ONLY the JSON object and nothing else 
+        `,
+      },
+      {
+        role: "user",
+        content: `Q: What does === do in JavaScript?
+          A: It checks strict equality-both value and type must match.
+
+          Q: How do you create a promise that resolves after 1 second?
+          A: const p = new Promise(r => setTimeout(r, 1000));
+
+          Q: What is hoisting?
+          A: JavaScript moves declarations (but not initialization) to top of their scope before code runs.
+
+          Q: Why use let instead of var?
+          A: let is block-scoped, avoiding the function-scope quirks and re-declaration issues of var.
+        `,
+      },
+    ],
+  });
+
+  console.log(completion.choices[0].message.content);
+}
+
+main();
+```
 
 ---
