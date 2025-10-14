@@ -18,6 +18,7 @@
 14. [About System Prompt](#14-about-system-prompt)
 15. [LLM Settings / Parameters Explained](#15-llm-settings--parameters-explained)
 16. [Structured Output in LLMs](#16-structured-output-in-llms)
+17. [Introducing Tool Calling](#17-introducing-tool-calling)
 
 ---
 
@@ -766,3 +767,18 @@ main();
 ```
 
 ---
+
+## 17. Introducing Tool Calling
+
+**Tool Calling** is a powerful feature in LLMs that allows them to interact with **external resources** such as APIs, databases, or the web.
+
+### Why Tool Calling is Important
+
+| Use Case                     | Description                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------- |
+| 🌦️ **Real-time Data**        | To fetch live information such as weather, stock prices, or news                 |
+| 🗓️ **System Integration**    | To access system-level tools like calendar, email, or file systems               |
+| 🧮 **Custom Logic**          | To perform mathematical operations or database queries                           |
+| 🧰 **Multi-step Automation** | To trigger multiple tools and automate workflows (similar to Zapier automations) |
+
+Tool Calling bridges the gap between **language understanding** and **action execution**, enabling LLMs to not just talk — but actually _do_ things in the real world.
