@@ -19,6 +19,7 @@
 15. [LLM Settings / Parameters Explained](#15-llm-settings--parameters-explained)
 16. [Structured Output in LLMs](#16-structured-output-in-llms)
 17. [Introducing Tool Calling](#17-introducing-tool-calling)
+18. [Adding Memory to Chatbot](#-18-adding-memory-to-chatbot)
 
 ---
 
@@ -952,5 +953,164 @@ async function webSearch({ query }) {
   return finalResult;
 }
 ```
+
+---
+
+## 🧠 18. Adding Memory to Chatbot
+
+In this section, we focus on adding memory to a Generative AI chatbot called Askly — enabling it to remember previous interactions within a conversation thread.
+
+Without memory, each user query is treated as an independent request, and the LLM forgets previous context (for example: if you say “I’m Mohit” and later ask “What’s my name?”, it won’t remember).
+
+<img src="./assets/chats.png" width="500px">
+
+By implementing memory, the chatbot becomes context-aware, allowing it to recall user information, previous questions, and maintain a natural flow of conversation — just like ChatGPT.
+
+### ⚙️ Why Memory is Important
+
+| Without Memory                     | With Memory                                           |
+| ---------------------------------- | ----------------------------------------------------- |
+| Each message is independent        | Maintains context between messages                    |
+| Chatbot forgets past user input    | Chatbot remembers user’s name, interests, and context |
+| Unnatural and repetitive responses | Smooth, conversational experience                     |
+| No personalization                 | Personalized and engaging chat                        |
+
+### 🧩 Approaches to Add Memory
+
+There are two main ways to add memory to your chatbot:
+
+1. In-Memory Cache (short-term, fast, simple)
+
+   - Data is stored temporarily in RAM.
+   - Lost when the server restarts.
+   - Ideal for prototypes and development.
+
+Example: node-cache.
+
+2. Database Storage (persistent, scalable)
+
+   - Data stored permanently in a database like MongoDB, Redis, or PostgreSQL.
+   - Useful for production-level assistants that should remember users long-term.
+
+### 🧠 Implementation Using Node-Cache
+
+**1. Install Node-Cache**
+
+```bash
+npm install node-cache
+```
+
+**2. Import and Initialize Cache**
+
+```javascript
+import NodeCache from "node-cache";
+const cache = new NodeCache({ stdTTL: 60 * 60 * 24 }); // Cache valid for 24 hours
+```
+
+stdTTL defines how long (in seconds) each cache entry remains valid (here, 24 hours).
+
+**3. Askly’s LLM logic now includes memory retrieval and storage:**
+
+```javascript
+import NodeCache from "node-cache";
+import Groq from "groq-sdk/index.mjs";
+import { tavily } from "@tavily/core";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
+
+const cache = new NodeCache({ stdTTL: 60 * 60 * 24 }); // 24 hours
+
+export async function generate(userMessage, threadId) {
+  const baseMessages = [
+    {
+      role: "system",
+      content: `You are Askly a smart personal assistant.
+                  If you know answers to a question, answer it directly in plain English.
+                  It the answer required real-time, local, or up-to-date information, or if you don't know the answer, use the available tools to find it....`,
+    },
+  ];
+
+  // RETRIEVE CONVERSATION MEMORY FOR GIVE THREAD
+  const messages = cache.get(threadId) ?? baseMessages;
+
+  messages.push({
+    role: "user",
+    content: userMessage,
+  });
+
+  while (true) {
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0,
+      messages: messages,
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "webSearch",
+            description:
+              "Search the latest information and realtime data on the internet.",
+            parameters: {
+              type: "object",
+              properties: {
+                query: {
+                  type: "string",
+                  description: "The search query to perform search on.",
+                },
+              },
+              required: ["query"],
+            },
+          },
+        },
+      ],
+      tool_choice: "auto",
+    });
+
+    // WHEN RESULT COMES OF COMPLETION ONE PUSH INTO MESSAGES
+    messages.push(completion.choices[0].message);
+
+    let toolCalls = completion.choices[0].message.tool_calls;
+
+    if (!toolCalls) {
+      cache.set(threadId, messages); // STORE CONVERSATION IN MEMORY
+      return completion.choices[0].message.content;
+    }
+
+    for (const tool of toolCalls) {
+      const functionName = tool.function.name;
+      const functionArgs = tool.function.arguments;
+
+      if (functionName === "webSearch") {
+        const toolResult = await webSearch(JSON.parse(functionArgs));
+
+        // PUSH THE TOOL CALL MESSAGE INTO MESSAGES ARRAY
+        messages.push({
+          tool_call_id: tool.id,
+          role: "tool",
+          name: functionName,
+          content: toolResult,
+        });
+      }
+    }
+  }
+}
+
+async function webSearch({ query }) {
+  console.log("Calling a web search...");
+
+  const response = await tvly.search(query);
+
+  const finalResult = response.results
+    .map((result) => result.content)
+    .join("\n\n");
+
+  return finalResult;
+}
+```
+
+**Here is the Final output:**
+
+<img src="./assets/chat-with-memory.png" width="500px">
 
 ---

@@ -1,11 +1,14 @@
+import NodeCache from "node-cache";
 import Groq from "groq-sdk/index.mjs";
 import { tavily } from "@tavily/core";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
 
-export async function generate(userMessage) {
-  const messages = [
+const cache = new NodeCache({ stdTTL: 60 * 60 * 24 }); // 24 hours
+
+export async function generate(userMessage, threadId) {
+  const baseMessages = [
     {
       role: "system",
       content: `You are Askly a smart personal assistant.
@@ -32,6 +35,9 @@ export async function generate(userMessage) {
                   current date and time: ${new Date().toUTCString()}`,
     },
   ];
+
+  // RETRIEVE CONVERSATION MEMORY FOR GIVE THREAD
+  const messages = cache.get(threadId) ?? baseMessages;
 
   messages.push({
     role: "user",
@@ -72,6 +78,7 @@ export async function generate(userMessage) {
     let toolCalls = completion.choices[0].message.tool_calls;
 
     if (!toolCalls) {
+      cache.set(threadId, messages); // STORE CONVERSATION IN MEMORY
       return completion.choices[0].message.content;
     }
 

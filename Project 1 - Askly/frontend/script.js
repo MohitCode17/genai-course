@@ -2,6 +2,9 @@ const input = document.querySelector("#prompt-input");
 const chatContainer = document.querySelector("#chat-container");
 const askBtn = document.querySelector("#ask-btn");
 
+const threadId =
+  Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+
 input.addEventListener("keyup", handleEnter);
 askBtn.addEventListener("click", handleAsk);
 
@@ -17,7 +20,7 @@ async function callServer(message) {
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ threadId, message }),
     });
 
     if (!response.ok) {
