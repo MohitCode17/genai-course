@@ -5,6 +5,11 @@ const askBtn = document.querySelector("#ask-btn");
 input.addEventListener("keyup", handleEnter);
 askBtn.addEventListener("click", handleAsk);
 
+// LOADING INDICATOR
+const loading = document.createElement("div");
+loading.className = "animate-pulse";
+loading.textContent = "Thinking...";
+
 async function callServer(message) {
   try {
     const response = await fetch(`http://localhost:3001/chat`, {
@@ -40,12 +45,18 @@ async function generate(text) {
   chatContainer?.appendChild(msg);
   input.value = "";
 
+  // SHOW LOADING
+  chatContainer.appendChild(loading);
+
   // CALL API
   const botMessage = await callServer(text);
 
   const botMessageElem = document.createElement("div");
   botMessageElem.className = `mb-4 bg-neutral-800 max-w-fit p-4 rounded-2xl text-sm shadow-md`;
   botMessageElem.textContent = botMessage;
+
+  // HIDE LOADING
+  loading.remove();
 
   chatContainer?.appendChild(botMessageElem);
 }
