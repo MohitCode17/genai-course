@@ -1161,3 +1161,160 @@ A Technique where a model first retrieves relevant information from a knowledge 
 6. Final Answer
 
    - The user receives an accurate and explainable response.
+
+---
+
+## 🧠 Understanding Core Concepts Before Building a RAG System
+
+Before building a Retrieval-Augmented Generation (RAG) system,
+we first need to understand some core concepts — because everything in RAG revolves around data.
+
+### 1. What is Data?
+
+Everything starts from data — because AI learns, retrieves, and generates answers from it.
+
+There are two main types of data 👇
+
+| Type                  | Description                         | Example                                            |
+| --------------------- | ----------------------------------- | -------------------------------------------------- |
+| **Structured Data**   | Organized in fixed rows and columns | Employee records, student database, transactions   |
+| **Unstructured Data** | Free-form, not stored in tables     | Company policies, PDFs, blog posts, emails, videos |
+
+Structured data can be easily stored and searched in traditional databases like:
+
+- MongoDB
+- PostgreSQL
+- MySQL
+
+Because its format is well-defined (columns, rows, indexes),
+
+you can run direct queries like:
+
+```sql
+SELECT * FROM employees WHERE department = 'Sales';
+```
+
+**The Challenge with Unstructured Data**
+
+But unstructured data (like PDFs, articles, or policy docs) can’t be stored or searched easily in tables.
+
+Even if you store it, how will you search meaningfully inside it?
+
+👉 Example:
+If you store an entire company policy as text, and you ask
+
+> “How many paid leaves do I get?”
+
+The system can’t understand meaning — it only does keyword search,
+so if “paid leaves” is written differently like “compensated vacation,” it fails.
+
+### 2. Enter: Similarity Search 🔍
+
+Similarity Search means finding the most relevant or similar results
+based on meaning, not just exact words.
+
+🧠 Example:
+
+- You ask: “Who founded Apple?”
+- Document says: “Apple was established by Steve Jobs and his team.”
+  Even though you didn’t use the word “founded,”
+  similarity search can still find it — because it matches the semantic meaning.
+
+It’s used in:
+
+- Google Lens (finding similar images)
+- Spotify (finding similar songs)
+- RAG (finding similar documents or knowledge)
+
+### 3. Vector Database: The Backbone of Similarity Search
+
+To perform similarity search, we need a vector database.
+
+🧮 Vector database stores vectors (numbers) that represent the meaning of text, images, etc.
+Instead of matching words, it finds **nearest** meaning.
+
+Examples of vector databases:
+
+- 🧠 Pinecone
+- ⚙️ ChromaDB
+- 📦 Weaviate
+- 🧩 FAISS
+
+### 4. What Are Vector Embeddings?
+
+Now the main question — how do we get these “vectors”?
+
+👉 Vector Embeddings are numerical representations of data that capture their semantic meaning.
+
+```
+Sentence: “Apple is a tech company.”
+Vector: [0.21, 0.88, -0.43, ...]
+```
+
+```
+Sentence: “Microsoft builds software.”
+Vector: [0.22, 0.87, -0.41, ...]
+```
+
+Since both have similar meanings, their vectors are close in multi-dimensional space.
+
+### 5. How Are Embeddings Created? (Machine Learning Models)
+
+Embeddings are generated using machine learning models
+trained to understand text meaning and context.
+
+These models analyze huge datasets and learn which words or phrases mean similar things.
+
+🧠 Examples of embedding models:
+
+- text-embedding-3-small (OpenAI)
+- sentence-BERT
+- Cohere-Embed
+- MiniLM
+
+These models convert text → vector numbers.
+
+### 6. Behind the Scenes: How Vector Embeddings Work
+
+Each piece of text becomes a point in high-dimensional space (not just 2D or 3D).
+For example, an embedding may have 768 or even 1536 dimensions.
+
+- Similar meanings → points close together
+- Unrelated meanings → points far apart
+
+These clusters represent how words or documents are semantically related.
+
+🌀 Example visualization:
+
+| Concept           | Nearby cluster              |
+| ----------------- | --------------------------- |
+| “dog”             | cat, puppy, animal          |
+| “finance”         | money, banking, investment  |
+| “apple (fruit)”   | banana, mango, orange       |
+| “apple (company)” | iPhone, MacBook, Steve Jobs |
+
+Once embeddings are created, they are stored in a vector database along with:
+
+- The original text/document
+- Metadata (source, title, tags)
+
+Then when a new query comes:
+
+1. Query → embedding
+2. Search in vector DB → finds top similar embeddings
+3. Return relevant documents → passed to LLM
+4. LLM uses them to generate the final answer
+
+### 7. Searching Efficiently — The Vector Index
+
+Now imagine millions of embeddings — searching one by one would be slow.
+So vector databases use a special data structure called a Vector Index
+to quickly find nearest vectors.
+
+Common vector indexing algorithms:
+
+- HNSW (Hierarchical Navigable Small World)
+- IVF (Inverted File Index)
+- Annoy (Approximate Nearest Neighbor)
+
+These help find “nearest” vectors fast even in large datasets.
