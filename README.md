@@ -20,6 +20,7 @@
 16. [Structured Output in LLMs](#16-structured-output-in-llms)
 17. [Introducing Tool Calling](#17-introducing-tool-calling)
 18. [Adding Memory to Chatbot](#-18-adding-memory-to-chatbot)
+19. [Overview of RAG]()
 
 ---
 
@@ -1114,3 +1115,49 @@ async function webSearch({ query }) {
 <img src="./assets/chat-with-memory.png" width="500px">
 
 ---
+
+## 19. Overview of RAG
+
+A Technique where a model first retrieves relevant information from a knowledge souce, then use that information to generate an answer.
+
+### How Things Work Without RAG
+
+<img src="./assets/without-rag.png" width="500px">
+
+### How Things Work With RAG
+
+<img src="./assets/with-rag.png" width="500px">
+
+### ⚙️ RAG Workflow (Step-by-Step)
+
+1. User Query
+
+   - The user asks a question.
+
+     Example: “What is the 44 Moving Average strategy in trading?”
+
+2. Retriever
+
+   - The retriever searches for relevant documents from an external knowledge base (PDFs, websites, databases, etc.)
+
+   - This uses semantic search (based on meaning, not keywords).
+
+3. Embedding
+
+   - Both the user query and documents are converted into vectors (numerical representations) using an embedding model.
+
+   - This allows the system to find semantically similar documents.
+
+4. Context Preparation
+
+   - The top relevant documents are added as context to the user’s query.
+
+5. LLM Generation
+
+   - The LLM receives the query + retrieved context.
+
+   - It then generates a fact-based, context-aware answer.
+
+6. Final Answer
+
+   - The user receives an accurate and explainable response.
