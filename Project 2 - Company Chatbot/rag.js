@@ -11,3 +11,9 @@
  * 2. Add retrieval step
  * 3. Pass input + relevant information to LLM
  */
+
+import { indexTheDocument } from "./prepare.js";
+
+const filePath = "./cg-internal-docs.pdf";
+
+indexTheDocument(filePath);
