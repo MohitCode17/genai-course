@@ -20,7 +20,8 @@
 16. [Structured Output in LLMs](#16-structured-output-in-llms)
 17. [Introducing Tool Calling](#17-introducing-tool-calling)
 18. [Adding Memory to Chatbot](#-18-adding-memory-to-chatbot)
-19. [Overview of RAG]()
+19. [Overview of RAG](#19-overview-of-rag)
+20. [Overview of Agentic AI]()
 
 ---
 
@@ -1318,3 +1319,52 @@ Common vector indexing algorithms:
 - Annoy (Approximate Nearest Neighbor)
 
 These help find “nearest” vectors fast even in large datasets.
+
+---
+
+## 20. Overview of Agentic AI
+
+### What is Agentic AI?
+
+**Agentic AI** refers to AI systems that can **act autonomously** — meaning they can make decisions, take actions, and achieve goals **without constant human input**.
+
+In simple terms:
+
+> Traditional AI just _responds_ to your input,  
+> but **Agentic AI can think, plan, and act on its own** to complete tasks.
+
+**Example:**
+
+Imagine you say:
+
+> “Book me a flight to Mumbai next week and reserve a nearby hotel.”
+
+A **normal AI** (like ChatGPT) would just tell you _how_ to do it.  
+But an **Agentic AI** would:
+
+1. Search for available flights ✈️
+2. Compare prices 💰
+3. Choose the best option ✅
+4. Book the ticket and confirm with you 💬
+
+That’s an **AI Agent** — taking **actions**, not just generating answers.
+
+### Key Abilities of Agentic AI
+
+| Capability               | Description                                 | Example                                            |
+| ------------------------ | ------------------------------------------- | -------------------------------------------------- |
+| **Autonomy**             | Works without continuous human control      | Books flight and hotel automatically               |
+| **Goal-Oriented**        | Understands your final goal and plans steps | Knows your goal is to “reach Mumbai comfortably”   |
+| **Reasoning & Planning** | Can think step-by-step                      | Decides which site gives the best deal             |
+| **Tool Use**             | Can use APIs, browsers, or software tools   | Uses Skyscanner API to fetch flights               |
+| **Memory**               | Remembers past actions and outcomes         | Learns your preferred airline or seat type         |
+| **Collaboration**        | Can work with other AI agents               | One agent books flight, another arranges transport |
+
+### Why Agentic AI is the Future
+
+- Reduces human workload
+- Automates multi-step complex workflows
+- Can collaborate with humans and other AI systems
+- A key building block for **Artificial General Intelligence (AGI)**
+
+---
