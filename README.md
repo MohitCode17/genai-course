@@ -21,7 +21,9 @@
 17. [Introducing Tool Calling](#17-introducing-tool-calling)
 18. [Adding Memory to Chatbot](#-18-adding-memory-to-chatbot)
 19. [Overview of RAG](#19-overview-of-rag)
-20. [Overview of Agentic AI]()
+20. [Overview of Agentic AI](#20-overview-of-agentic-ai)
+21. [LangChain Vs LangGraph](#21-langchain-vs-langgraph)
+22. [Why LangGraph?](#22-why-langgraph)
 
 ---
 
@@ -1368,3 +1370,54 @@ That’s an **AI Agent** — taking **actions**, not just generating answers.
 - A key building block for **Artificial General Intelligence (AGI)**
 
 ---
+
+## 21. LangChain Vs LangGraph
+
+When building advanced AI systems like RAGs or Agentic AI, two popular frameworks often come up — **LangChain** and **LangGraph**.
+
+Both help developers connect LLMs (like GPT, Llama, or Groq) with tools, memory, and reasoning workflows,  
+but they have **different purposes and architectures**.
+
+### 1. What is LangChain?
+
+LangChain is an open-source framework designed to build **LLM-powered applications** easily.
+
+It helps you:
+
+- Connect **LLMs** with **tools**, **APIs**, **databases**, and **memory**.
+- Chain multiple steps together — like _get user input → retrieve info → summarize → output_.
+- Implement **RAG**, **chatbots**, **data Q&A**, and **agents**.
+
+### 🧩 Key Concepts
+
+- **Chains** → Sequence of tasks (like a pipeline).
+- **Agents** → LLMs that decide _which tool to use_ for a goal.
+- **Memory** → Keeps context of previous interactions.
+- **Tool calling** → Execute external APIs (like web search, DB query).
+- **Retrievers & VectorStores** → For RAG-based workflows.
+
+### ⚙️ 2. What is LangGraph?
+
+LangGraph is a new framework built by the same LangChain team —
+but designed for agentic, multi-step reasoning and stateful workflows.
+
+In short:
+
+> LangGraph = LangChain + Memory + Event Loop + Agents that can think + act repeatedly
+
+It’s inspired by computational graphs — where each “node” is a step (LLM, Tool, Decision, etc.)
+and data moves between these nodes.
+
+### ✅ When to Use LangGraph
+
+- When building autonomous agents that:
+
+  - Think, plan, and act in loops.
+  - Maintain state across multiple decisions.
+  - Need multi-agent collaboration.
+
+- When you want fine-grained control over flow, memory, and retries.
+
+## 22. Why LangGraph?
+
+[Here is the official Documentation.](https://langchain-ai.github.io/langgraphjs/concepts/high_level/)
