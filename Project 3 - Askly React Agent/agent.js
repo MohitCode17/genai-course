@@ -2,7 +2,13 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatGroq } from "@langchain/groq";
 import { TavilySearch } from "@langchain/tavily";
 import { tool } from "@langchain/core/tools";
-import { json, z } from "zod";
+import { z } from "zod";
+import readline from "node:readline";
+// import { writeFileSync } from "node:fs";
+
+function askQuestion(rl, query) {
+  return new Promise((resolve) => rl.question(query, resolve));
+}
 
 async function main() {
   const model = new ChatGroq({
@@ -19,7 +25,12 @@ async function main() {
     async ({ query }) => {
       // GOOGLE CALENDAR LOGIC GOES HERE...
       return JSON.stringify([
-        { title: "Meeting with Ritkit Shah", date: "28th Oct 2025", time: "2 PM", location: "Gmeet" },
+        {
+          title: "Meeting with Ritkit Shah",
+          date: "28th Oct 2025",
+          time: "2 PM",
+          location: "Gmeet",
+        },
       ]);
     },
     // INFORMATION OF TOOL
@@ -41,24 +52,46 @@ async function main() {
     tools: [search, calendarEvents],
   });
 
-  const result = await agent.invoke({
-    messages: [
-      {
-        role: "system",
-        content: `You are a personal assistant. Use provided tools to get the information if you don't have it. Current date and time: ${new Date().toUTCString()}`,
-      },
-      {
-        role: "user",
-        content: "Do I have any meeting for tommorow?",
-      },
-    ],
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
 
-  // console.log(result);
-  console.log(
-    "Assistant:",
-    result.messages[result.messages.length - 1].content
-  );
+  while (true) {
+    const userQuery = await askQuestion(rl, "You: ");
+
+    if (userQuery === "/bye") {
+      console.log("Assistant: Goodbye!");
+      break;
+    }
+
+    const result = await agent.invoke({
+      messages: [
+        {
+          role: "system",
+          content: `You are a personal assistant. Use provided tools to get the information if you don't have it. Current date and time: ${new Date().toUTCString()}`,
+        },
+        {
+          role: "user",
+          content: userQuery,
+        },
+      ],
+    });
+
+    console.log(
+      "Assistant:",
+      result.messages[result.messages.length - 1].content
+    );
+  }
+
+  // const drawableGraphGraphState = await agent.getGraphAsync();
+  // const graphStateImage = await drawableGraphGraphState.drawMermaidPng();
+  // const graphStateArrayBuffer = await graphStateImage.arrayBuffer();
+
+  // const filePath = "./graphState.png";
+  // writeFileSync(filePath, new Uint8Array(graphStateArrayBuffer));
+
+  rl.close();
 }
 
 main();
