@@ -9,21 +9,21 @@
 5. [Introduction to LLMs](#5-introduction-to-llms)
 6. [How does LLM Work?](#6-how-does-llms-work)
 7. [What Was the Process of Text Generation Before LLMs?](#7-what-was-the-process-of-text-generation-before-llms)
-8. [LLM Models and Their Capabilities](#8-llm-models-and-their-capabilities)
-9. [GPT Models VS Reasoning Models](#9-gpt-models-vs-reasoning-models)
-10. [Token, Context, Context Window & Inference](#10-token-context-context-window--inference)
-11. [Introduction of Prompt Engineering](#11-introduction-of-prompt-engineering)
-12. [Types of Prompting in LLMs](#12-types-of-prompting-in-llms)
-13. [Invoking the LLM](#13-invoking-the-llm)
-14. [About System Prompt](#14-about-system-prompt)
-15. [LLM Settings / Parameters Explained](#15-llm-settings--parameters-explained)
-16. [Structured Output in LLMs](#16-structured-output-in-llms)
-17. [Introducing Tool Calling](#17-introducing-tool-calling)
-18. [Adding Memory to Chatbot](#-18-adding-memory-to-chatbot)
-19. [Overview of RAG](#19-overview-of-rag)
-20. [Overview of Agentic AI](#20-overview-of-agentic-ai)
-21. [LangChain Vs LangGraph](#21-langchain-vs-langgraph)
-22. [Why LangGraph?](#22-why-langgraph)
+8. [GPT Models VS Reasoning Models](#9-gpt-models-vs-reasoning-models)
+9. [Token, Context, Context Window & Inference](#10-token-context-context-window--inference)
+10. [Introduction of Prompt Engineering](#11-introduction-of-prompt-engineering)
+11. [Types of Prompting in LLMs](#12-types-of-prompting-in-llms)
+12. [Invoking the LLM](#13-invoking-the-llm)
+13. [About System Prompt](#14-about-system-prompt)
+14. [LLM Settings / Parameters Explained](#15-llm-settings--parameters-explained)
+15. [Structured Output in LLMs](#16-structured-output-in-llms)
+16. [Introducing Tool Calling](#17-introducing-tool-calling)
+17. [Adding Memory to Chatbot](#-18-adding-memory-to-chatbot)
+18. [Overview of RAG](#19-overview-of-rag)
+19. [Overview of Agentic AI](#20-overview-of-agentic-ai)
+20. [LangChain Vs LangGraph](#21-langchain-vs-langgraph)
+21. [Why LangGraph?](#22-why-langgraph)
+22. [ReAct Agent — The Foundation of Agentic AI](#22-react-agent--the-foundation-of-agentic-ai)
 
 ---
 
@@ -31,8 +31,7 @@
 
 **Generative AI** is a type of **Artificial Intelligence (AI)** that can **create new content**, such as **text, images, audio, video, or even code**.
 
-It works by combining the power of **Machine Learning (ML)** and **Deep Learning (DL)**.  
-These models learn from large datasets and can then **generate original outputs** that mimic or extend the patterns in the training data.
+It works by combining the power of **Machine Learning (ML)** and **Deep Learning (DL)**. These models learn from large datasets.
 
 ---
 
@@ -162,18 +161,6 @@ Each block contains:
 4. **Residual Connections:**  
    Help prevent information loss by adding input values back into outputs (skip connections).
 
-### 🔄 Encoder–Decoder Workflow
-
-Input Text → Encoder → Context Representation → Decoder → Generated Output
-
-```
-Example:
-
-Input: "Translate 'Hello' to Spanish"
-Encoder understands → meaning of "Hello"
-Decoder generates → "Hola"
-```
-
 ---
 
 ## 5. Introduction to LLMs
@@ -182,16 +169,14 @@ Decoder generates → "Hola"
 
 ### 🧠 Important Concepts
 
-- **Scale Matters:** The word _“Large”_ refers to models containing **billions or even trillions of parameters**. These **parameters** represent the model’s internal “knowledge” — how it maps words, meanings, and context together.
-- **Trained on Massive Text Data:** LLMs are trained on enormous datasets including **books, websites, articles, code, and conversations**, allowing them to develop a strong understanding of **real-world knowledge and language structure**.
-- **Beyond Text Generation:** LLMs are capable of performing a wide range of tasks such as **summarization, translation, question answering, code generation, and reasoning**.
+- The word _“Large”_ refers to models containing **billions or even trillions of parameters**. These **parameters** represent the model’s internal “knowledge” — how it maps words, meanings, and context together.
+- LLMs are trained on enormous datasets including **books, websites, articles, code, and conversations**, allowing them to develop a strong understanding of **real-world knowledge and language structure**.
+- LLMs are capable of performing a wide range of tasks such as **summarization, translation, question answering, code generation, and reasoning**.
 
 ### ⚙️ Example
 
 - **GPT-3:** ~175 Billion parameters
 - **GPT-4:** Estimated to have **trillions of parameters** (exact numbers are undisclosed)
-
-🧩 **In short:** Large Language Models are the core engines behind today’s AI systems, combining massive scale, deep learning, and contextual understanding to perform complex language-based tasks with human-like intelligence.
 
 ---
 
@@ -204,8 +189,6 @@ An **LLM (Large Language Model)** is essentially a **next-word prediction machin
 1. You provide a **prompt** — for example: _“Delhi is the capital of …”_
 2. The model uses its **training data** and **parameters** to predict the most likely next word — in this case, _“India”_.
 3. This prediction process continues **word by word**, using previous outputs as context, until the **complete response** is generated.
-
-🧩 **In short:** LLMs generate text by predicting the next word based on probability and context — repeating this process millions of times to form coherent, human-like language.
 
 ---
 
@@ -245,54 +228,7 @@ Before **LLMs**, text generation relied on **rule-based** and **statistical mode
 
 ---
 
-## 8. LLM Models and Their Capabilities
-
-Here are some of the most popular **Large Language Models (LLMs)** and what they are best known for 👇
-
----
-
-### 🤖 GPT (Generative Pre-trained Transformer) – _OpenAI_
-
-- **GPT-2 (2019):** First widely known model to generate coherent text; still made random errors.
-- **GPT-3 (2020):** 175B parameters; capable of essays, blogs, coding, and summarization.
-- **GPT-4 (2023):** Multimodal (text + image), strong in reasoning, coding, and problem-solving.
-
-### 🧠 BERT (Bidirectional Encoder Representations from Transformers) – _Google, 2018_
-
-- Focused on **understanding** text, not generating.
-- Great for sentiment analysis, Q&A, and text classification.
-- 🏆 Known as the “understanding” model of NLP.
-
-### 🔤 T5 (Text-to-Text Transfer Transformer) – _Google, 2020_
-
-- Converts every NLP task into a **text-to-text** format.
-- Example: _“Translate English to Hindi: How are you?” → “Aap kaise ho?”_
-- Used for translation, summarization, and Q&A.
-
-### 🌍 BLOOM – _BigScience, 2022 (Open Source)_
-
-- **Multilingual model** (supports 46 languages).
-- Open-source alternative to GPT, handles mixed-language prompts easily.
-
-### 🦙 LLaMA – _Meta, 2023_
-
-- Lightweight and **developer-friendly** models.
-- Runs efficiently on personal machines.
-- Open-source versions like **LLaMA-2** are great for AI app development.
-
-### 🪶 Claude – _Anthropic, 2023_
-
-- Designed for **safety** and **long-context** understanding.
-- Can process 100k+ tokens — perfect for summarizing long documents or research papers.
-
-### ⚡ Falcon – _TII, 2023 (Open Source)_
-
-- **Fast and cost-efficient** LLM.
-- Competitive with GPT-3.5 in text generation and ideal for fine-tuning business applications.
-
----
-
-## 9. GPT Models vs Reasoning Models
+## 8. GPT Models vs Reasoning Models
 
 ### GPT Models (Generative Models)
 
@@ -314,7 +250,7 @@ Here are some of the most popular **Large Language Models (LLMs)** and what they
 
 ---
 
-## 10. Token, Context, Context Window & Inference
+## 9. Token, Context, Context Window & Inference
 
 These four terms form the foundation of how LLMs work.
 
@@ -365,7 +301,7 @@ No training happens here — only **prediction** based on learned knowledge.
 
 ---
 
-## 11. Introduction of Prompt Engineering
+## 10. Introduction of Prompt Engineering
 
 **Prompt engineering** is the process of crafting instructions for AI models (LLMs) so they produce the desired output. Clear, structured, and context-rich prompts lead to more accurate results.
 
@@ -393,7 +329,7 @@ The second prompt is more specific and role-based, so it yields a more focused a
 
 ---
 
-## 12. Types of Prompting in LLMs
+## 11. Types of Prompting in LLMs
 
 There are three foundational prompting styles: **Zero-Shot**, **Few-Shot**, and **Chain-of-Thought (CoT)**.
 
@@ -406,8 +342,10 @@ You give the model a task with **no examples**; it relies solely on its training
 
 **Example:**
 
-> Prompt: “Translate to Hindi: ‘AI will change the world.’”  
-> Output: “AI duniya ko badal dega.”
+```
+Prompt: “Translate to Hindi: ‘AI will change the world.’”
+Output: “AI duniya ko badal dega.”
+```
 
 ### Few-Shot Prompting
 
@@ -449,7 +387,7 @@ Final Answer: ₹200
 
 ---
 
-## 13. Invoking the LLM
+## 12. Invoking the LLM
 
 This section explains how to invoke LLMs in your code using **Groq Cloud**, a cloud-based platform providing high-performance AI accelerators and LLMs, so you can run models efficiently without local hardware.
 
@@ -521,7 +459,7 @@ main();
 
 ---
 
-## 14. About System Prompt
+## 13. About System Prompt
 
 A **System Prompt** is a special message given to an LLM at the start of a conversation to set its **role, behavior, and style**.
 
@@ -543,7 +481,6 @@ messages: [
 1. **Set Persona:**
 
    - Example: "Askly, smart personal assistant" → model responds in a friendly, informative, and helpful tone.
-   - Changing the system prompt (e.g., "You are a harsh critic") alters tone and style.
 
 2. **Guide Conversation Context:**
 
@@ -555,7 +492,7 @@ messages: [
 
 ---
 
-## 15. LLM Settings / Parameters Explained
+## 14. LLM Settings / Parameters Explained
 
 ```javascript
 async function main() {
@@ -589,7 +526,7 @@ Controls model randomness (0 to 2). Higher → more creative but inconsistent.
 - `0.7-1` → creative writing, marketing content
 - `> 1` → brainstorming, jokes, unpredictable output
 
-### 2. top_p (Nucleus Sampling)
+### 2. top_p
 
 Chooses words from top cumulative probability p.
 
@@ -651,7 +588,7 @@ Penalizes words already appeared, encourages new topics.
 
 ---
 
-## 16. Structured Output in LLMs
+## 15. Structured Output in LLMs
 
 When we want an LLM to produce output in a specific format or structure (like JSON, key-value pairs, tables, or lists), it’s called **Structured Output**.
 
@@ -773,7 +710,7 @@ main();
 
 ---
 
-## 17. Introducing Tool Calling
+## 16. Introducing Tool Calling
 
 **Tool Calling** is a powerful feature in LLMs that allows them to interact with **external resources** such as APIs, databases, or the web.
 
@@ -960,7 +897,7 @@ async function webSearch({ query }) {
 
 ---
 
-## 🧠 18. Adding Memory to Chatbot
+## 🧠 17. Adding Memory to Chatbot
 
 In this section, we focus on adding memory to a Generative AI chatbot called Askly — enabling it to remember previous interactions within a conversation thread.
 
@@ -1119,7 +1056,7 @@ async function webSearch({ query }) {
 
 ---
 
-## 19. Overview of RAG
+## 18. Overview of RAG
 
 A Technique where a model first retrieves relevant information from a knowledge souce, then use that information to generate an answer.
 
@@ -1136,19 +1073,16 @@ A Technique where a model first retrieves relevant information from a knowledge 
 1. User Query
 
    - The user asks a question.
-
-     Example: “What is the 44 Moving Average strategy in trading?”
+   - Example: “What is the 44 Moving Average strategy in trading?”
 
 2. Retriever
 
    - The retriever searches for relevant documents from an external knowledge base (PDFs, websites, databases, etc.)
-
    - This uses semantic search (based on meaning, not keywords).
 
 3. Embedding
 
-   - Both the user query and documents are converted into vectors (numerical representations) using an embedding model.
-
+   - Both the user query and documents are converted into vectors using an embedding model.
    - This allows the system to find semantically similar documents.
 
 4. Context Preparation
@@ -1158,7 +1092,6 @@ A Technique where a model first retrieves relevant information from a knowledge 
 5. LLM Generation
 
    - The LLM receives the query + retrieved context.
-
    - It then generates a fact-based, context-aware answer.
 
 6. Final Answer
@@ -1191,12 +1124,6 @@ Structured data can be easily stored and searched in traditional databases like:
 
 Because its format is well-defined (columns, rows, indexes),
 
-you can run direct queries like:
-
-```sql
-SELECT * FROM employees WHERE department = 'Sales';
-```
-
 **The Challenge with Unstructured Data**
 
 But unstructured data (like PDFs, articles, or policy docs) can’t be stored or searched easily in tables.
@@ -1214,7 +1141,7 @@ so if “paid leaves” is written differently like “compensated vacation,” 
 ### 2. Enter: Similarity Search 🔍
 
 Similarity Search means finding the most relevant or similar results
-based on meaning, not just exact words.
+based on **meaning**, not just exact words.
 
 🧠 Example:
 
@@ -1223,17 +1150,11 @@ based on meaning, not just exact words.
   Even though you didn’t use the word “founded,”
   similarity search can still find it — because it matches the semantic meaning.
 
-It’s used in:
-
-- Google Lens (finding similar images)
-- Spotify (finding similar songs)
-- RAG (finding similar documents or knowledge)
-
 ### 3. Vector Database: The Backbone of Similarity Search
 
 To perform similarity search, we need a vector database.
 
-🧮 Vector database stores vectors (numbers) that represent the meaning of text, images, etc.
+Vector database stores vectors (numbers) that represent the meaning of text, images, etc.
 Instead of matching words, it finds **nearest** meaning.
 
 Examples of vector databases:
@@ -1261,7 +1182,7 @@ Vector: [0.22, 0.87, -0.41, ...]
 
 Since both have similar meanings, their vectors are close in multi-dimensional space.
 
-### 5. How Are Embeddings Created? (Machine Learning Models)
+### 5. How Are Embeddings Created?
 
 Embeddings are generated using machine learning models
 trained to understand text meaning and context.
@@ -1324,7 +1245,7 @@ These help find “nearest” vectors fast even in large datasets.
 
 ---
 
-## 20. Overview of Agentic AI
+## 19. Overview of Agentic AI
 
 ### What is Agentic AI?
 
@@ -1371,7 +1292,7 @@ That’s an **AI Agent** — taking **actions**, not just generating answers.
 
 ---
 
-## 21. LangChain Vs LangGraph
+## 20. LangChain Vs LangGraph
 
 When building advanced AI systems like RAGs or Agentic AI, two popular frameworks often come up — **LangChain** and **LangGraph**.
 
@@ -1418,6 +1339,128 @@ and data moves between these nodes.
 
 - When you want fine-grained control over flow, memory, and retries.
 
-## 22. Why LangGraph?
+## 21. Why LangGraph?
 
 [Here is the official Documentation.](https://langchain-ai.github.io/langgraphjs/concepts/high_level/)
+
+---
+
+## 22. ReAct Agent — The Foundation of Agentic AI
+
+**ReAct** stands for **Reasoning + Acting**.
+
+A **ReAct Agent** is a special kind of AI agent architecture that allows Large Language Models (LLMs)  
+to **reason (think step-by-step)** _and_ **act (perform tasks or use tools)** in a loop —  
+just like how a human thinks before taking action.
+
+It was introduced in a research paper by Google and Princeton titled  
+👉 _“ReAct: Synergizing Reasoning and Acting in Language Models”_ (2022).
+
+### 💡 Why the Name “ReAct”?
+
+- **“Re” = Reasoning** → The agent **analyzes** the problem, thinks logically, and decides what to do next.
+- **“Act” = Acting** → The agent **takes an action**, like calling a tool, searching the web, or performing a computation.
+
+The agent repeats this loop —  
+**Think → Act → Observe → Think again → Act again → Final Answer**
+
+### ReAct Workflow (Step-by-Step)
+
+Here’s how the **ReAct loop** works internally:
+
+1. **User Input**  
+   → “What’s the current price of Tesla stock?”
+
+2. **Reasoning Step (Thought)**  
+   → “I need real-time data, so I should use a web search tool.”
+
+3. **Action Step**  
+   → The agent calls the tool: `webSearch("current Tesla stock price")`
+
+4. **Observation**  
+   → The tool returns: “Tesla stock price is $255 as of Oct 2025.”
+
+5. **Reasoning Again**  
+   → “Now that I have the data, I can respond to the user.”
+
+6. **Final Answer**  
+   → “The current Tesla stock price is around $255.”
+
+This loop continues until the agent is confident it has enough information.
+
+### ⚡ Why ReAct is Powerful
+
+ReAct is a **game-changer** because it combines two critical abilities:
+
+#### 🧠 1. Reasoning Ability
+
+- The model doesn’t just generate text — it **thinks step-by-step**.
+- It can plan, analyze, and make decisions.
+
+#### ⚙️ 2. Acting Ability
+
+- It can **use tools**, access APIs, perform searches, or compute results.
+- This removes the limitations of static LLMs (which can’t access real-time or external info).
+
+---
+
+### 🧩 Why ReAct is Important
+
+| Problem (in normal LLMs)           | How ReAct Solves It                            |
+| ---------------------------------- | ---------------------------------------------- |
+| LLMs can’t access real-time data   | ReAct agents can use tools like search or APIs |
+| LLMs sometimes hallucinate facts   | ReAct agents verify through observation        |
+| LLMs can’t take dynamic actions    | ReAct enables reasoning + action loop          |
+| LLMs are static after one response | ReAct can self-correct and iterate             |
+
+### 🌍 Real-World Use Cases
+
+| Use Case                      | Description                                                             |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| 🔎 **Web Search Agent**       | Finds real-time information using ReAct reasoning loop                  |
+| 💬 **Customer Support Agent** | Looks up database info before answering                                 |
+| 📊 **Data Analyst Bot**       | Uses reasoning to choose which dataset or tool to query                 |
+| 🤖 **Multi-tool Assistant**   | Dynamically decides whether to call a calculator, API, or search engine |
+
+---
+
+## 🤖 Is ReAct Agent Still in Use Today?
+
+## 🧩 Short Answer:
+
+✅ **Yes — ReAct is still used**, but not always **explicitly**.  
+Instead, its **core idea (Reasoning + Acting loop)** is now **built inside modern LLMs and frameworks**.
+
+### ⚙️ Understanding the Situation
+
+#### 🧠 Before (Old LLMs)
+
+- Old LLMs like GPT-3 or early instruction models could only **generate text**.
+- They couldn’t **call tools**, **plan steps**, or **fetch real-time data**.
+- So, the **ReAct framework** was developed to give LLMs the ability to:
+  - Think step-by-step (Reasoning)
+  - Use tools or APIs (Acting)
+  - Learn from results (Observation)
+
+➡️ Example: LangChain used ReAct-style prompts to make LLMs “agents”.
+
+#### ⚙️ Now (Modern LLMs like GPT-4, GPT-5, Claude, Gemini)
+
+- Modern models already have **built-in ReAct-style capabilities**.
+- They can:
+  - Call tools natively (e.g., code interpreter, browser, DALL·E)
+  - Perform reasoning internally
+  - Chain thoughts and actions automatically
+
+So, the **ReAct logic is now baked inside** these models rather than needing manual prompting.
+
+### 🧠 How ReAct Still Matters
+
+Even though LLMs now do this internally, **ReAct remains the foundation** of:
+
+- Agent frameworks like **LangChain**, **LangGraph**, **CrewAI**
+- OpenAI’s **Assistants API (function calling loop)**
+- **Tool-using AI systems** (e.g., ChatGPT browsing mode)
+- **Autonomous agents** that plan multi-step workflows
+
+---
