@@ -2,9 +2,9 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatGroq } from "@langchain/groq";
 import { TavilySearch } from "@langchain/tavily";
 import { tool } from "@langchain/core/tools";
+import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
 import readline from "node:readline";
-// import { writeFileSync } from "node:fs";
 
 function askQuestion(rl, query) {
   return new Promise((resolve) => rl.question(query, resolve));
@@ -47,9 +47,13 @@ async function main() {
     }
   );
 
+  // ADD MEMORY TO AGENT
+  const checkpointer = new MemorySaver();
+
   const agent = createReactAgent({
     llm: model,
     tools: [search, calendarEvents],
+    checkpointer: checkpointer,
   });
 
   const rl = readline.createInterface({
@@ -65,31 +69,27 @@ async function main() {
       break;
     }
 
-    const result = await agent.invoke({
-      messages: [
-        {
-          role: "system",
-          content: `You are a personal assistant. Use provided tools to get the information if you don't have it. Current date and time: ${new Date().toUTCString()}`,
-        },
-        {
-          role: "user",
-          content: userQuery,
-        },
-      ],
-    });
+    const result = await agent.invoke(
+      {
+        messages: [
+          {
+            role: "system",
+            content: `You are a personal assistant. Use provided tools to get the information if you don't have it. Current date and time: ${new Date().toUTCString()}`,
+          },
+          {
+            role: "user",
+            content: userQuery,
+          },
+        ],
+      },
+      { configurable: { thread_id: "1" } }
+    );
 
     console.log(
       "Assistant:",
       result.messages[result.messages.length - 1].content
     );
   }
-
-  // const drawableGraphGraphState = await agent.getGraphAsync();
-  // const graphStateImage = await drawableGraphGraphState.drawMermaidPng();
-  // const graphStateArrayBuffer = await graphStateImage.arrayBuffer();
-
-  // const filePath = "./graphState.png";
-  // writeFileSync(filePath, new Uint8Array(graphStateArrayBuffer));
 
   rl.close();
 }
