@@ -94,7 +94,10 @@ const graph = new StateGraph(MessagesAnnotation)
   .addNode("tools", toolNode)
   .addEdge("__start__", "llm")
   .addEdge("tools", "llm")
-  .addConditionalEdges("llm", whereToGo);
+  .addConditionalEdges("llm", whereToGo, {
+    __end__: END,
+    tools: "tools",
+  });
 
 // TO MAKE GRAPH RUNNABLE
 const app = graph.compile({ checkpointer });
