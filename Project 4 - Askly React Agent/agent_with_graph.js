@@ -17,6 +17,9 @@ import {
 import { z } from "zod";
 import readline from "node:readline/promises";
 
+// Memory
+const checkpointer = new MemorySaver();
+
 // Search Tool
 const search = new TavilySearch({
   maxResults: 3,
@@ -94,9 +97,11 @@ const graph = new StateGraph(MessagesAnnotation)
   .addConditionalEdges("llm", whereToGo);
 
 // TO MAKE GRAPH RUNNABLE
-const app = graph.compile();
+const app = graph.compile({ checkpointer });
 
 async function main() {
+  let config = { configurable: { thread_id: "1" } };
+
   // Take user input
   const rl = readline.createInterface({
     input: process.stdin,
@@ -111,14 +116,17 @@ async function main() {
     }
 
     // Pass the Initial Message and Invoke the App
-    const result = await app.invoke({
-      messages: [
-        {
-          role: "human",
-          content: userInput,
-        },
-      ],
-    });
+    const result = await app.invoke(
+      {
+        messages: [
+          {
+            role: "human",
+            content: userInput,
+          },
+        ],
+      },
+      config
+    );
 
     const messages = result.messages;
     // console.log("AI Result:", messages);
