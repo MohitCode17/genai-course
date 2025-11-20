@@ -15,7 +15,7 @@ import {
   StateGraph,
 } from "@langchain/langgraph";
 import { z } from "zod";
-import readline from "node:readline";
+import readline from "node:readline/promises";
 
 // Search Tool
 const search = new TavilySearch({
@@ -97,18 +97,36 @@ const graph = new StateGraph(MessagesAnnotation)
 const app = graph.compile();
 
 async function main() {
-  // Pass the Initial Message and Invoke the App
-  const result = await app.invoke({
-    messages: [
-      { role: "human", content: "Who is the Current Chief Minister of Bihar?" },
-    ],
+  // Take user input
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
 
-  const messages = result.messages;
-  // console.log("AI Result:", messages);
-  const final = messages[messages.length - 1];
+  while (true) {
+    const userInput = await rl.question("You: ");
 
-  console.log("Agent:", final.content);
+    if (userInput === "/bye") {
+      break;
+    }
+
+    // Pass the Initial Message and Invoke the App
+    const result = await app.invoke({
+      messages: [
+        {
+          role: "human",
+          content: userInput,
+        },
+      ],
+    });
+
+    const messages = result.messages;
+    // console.log("AI Result:", messages);
+    const final = messages[messages.length - 1];
+    console.log("Agent:", final.content);
+  }
+
+  rl.close();
 }
 
 main();
