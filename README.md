@@ -22,8 +22,7 @@
 18. [Overview of RAG](#19-overview-of-rag)
 19. [Overview of Agentic AI](#20-overview-of-agentic-ai)
 20. [LangChain Vs LangGraph](#21-langchain-vs-langgraph)
-21. [Why LangGraph?](#22-why-langgraph)
-22. [ReAct Agent — The Foundation of Agentic AI](#22-react-agent--the-foundation-of-agentic-ai)
+21. [ReAct Agent — The Foundation of Agentic AI](#22-react-agent--the-foundation-of-agentic-ai)
 
 ---
 
@@ -656,60 +655,6 @@ This enforces the model to strictly return pure JSON output.
 
 ---
 
-### Project: An Interview Grade LLM:
-
-```javascript
-import Groq from "groq-sdk/index.mjs";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-async function main() {
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "system",
-        content: `You are an interview grader assistant. Your tast is to generate candidate evaluation score.
-        Output must be following JSON structure:
-        {
-          "confidence": number (1-10 scale),
-          "accuracy": number (1-10 scale),
-          "pass": boolean (true or false),
-        }
-
-        The response must:
-          1. Include ALL fields shown above
-          2. Use only the exact field names shown
-          3. Follow the exact data types specified
-          4. Contain ONLY the JSON object and nothing else 
-        `,
-      },
-      {
-        role: "user",
-        content: `Q: What does === do in JavaScript?
-          A: It checks strict equality-both value and type must match.
-
-          Q: How do you create a promise that resolves after 1 second?
-          A: const p = new Promise(r => setTimeout(r, 1000));
-
-          Q: What is hoisting?
-          A: JavaScript moves declarations (but not initialization) to top of their scope before code runs.
-
-          Q: Why use let instead of var?
-          A: let is block-scoped, avoiding the function-scope quirks and re-declaration issues of var.
-        `,
-      },
-    ],
-  });
-
-  console.log(completion.choices[0].message.content);
-}
-
-main();
-```
-
----
-
 ## 16. Introducing Tool Calling
 
 **Tool Calling** is a powerful feature in LLMs that allows them to interact with **external resources** such as APIs, databases, or the web.
@@ -792,12 +737,6 @@ async function main() {
 }
 
 main();
-
-async function webSearch({ query }) {
-  console.log("Calling a web search...");
-  // Here we call api for getting real time updates
-  return `The current Captain of Indian Text Cricket Team is Shubman Gill.`;
-}
 ```
 
 ### Tool Calling: Implement Tool
@@ -932,127 +871,6 @@ Example: node-cache.
 
    - Data stored permanently in a database like MongoDB, Redis, or PostgreSQL.
    - Useful for production-level assistants that should remember users long-term.
-
-### 🧠 Implementation Using Node-Cache
-
-**1. Install Node-Cache**
-
-```bash
-npm install node-cache
-```
-
-**2. Import and Initialize Cache**
-
-```javascript
-import NodeCache from "node-cache";
-const cache = new NodeCache({ stdTTL: 60 * 60 * 24 }); // Cache valid for 24 hours
-```
-
-stdTTL defines how long (in seconds) each cache entry remains valid (here, 24 hours).
-
-**3. Askly’s LLM logic now includes memory retrieval and storage:**
-
-```javascript
-import NodeCache from "node-cache";
-import Groq from "groq-sdk/index.mjs";
-import { tavily } from "@tavily/core";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
-
-const cache = new NodeCache({ stdTTL: 60 * 60 * 24 }); // 24 hours
-
-export async function generate(userMessage, threadId) {
-  const baseMessages = [
-    {
-      role: "system",
-      content: `You are Askly a smart personal assistant.
-                  If you know answers to a question, answer it directly in plain English.
-                  It the answer required real-time, local, or up-to-date information, or if you don't know the answer, use the available tools to find it....`,
-    },
-  ];
-
-  // RETRIEVE CONVERSATION MEMORY FOR GIVE THREAD
-  const messages = cache.get(threadId) ?? baseMessages;
-
-  messages.push({
-    role: "user",
-    content: userMessage,
-  });
-
-  while (true) {
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      temperature: 0,
-      messages: messages,
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "webSearch",
-            description:
-              "Search the latest information and realtime data on the internet.",
-            parameters: {
-              type: "object",
-              properties: {
-                query: {
-                  type: "string",
-                  description: "The search query to perform search on.",
-                },
-              },
-              required: ["query"],
-            },
-          },
-        },
-      ],
-      tool_choice: "auto",
-    });
-
-    // WHEN RESULT COMES OF COMPLETION ONE PUSH INTO MESSAGES
-    messages.push(completion.choices[0].message);
-
-    let toolCalls = completion.choices[0].message.tool_calls;
-
-    if (!toolCalls) {
-      cache.set(threadId, messages); // STORE CONVERSATION IN MEMORY
-      return completion.choices[0].message.content;
-    }
-
-    for (const tool of toolCalls) {
-      const functionName = tool.function.name;
-      const functionArgs = tool.function.arguments;
-
-      if (functionName === "webSearch") {
-        const toolResult = await webSearch(JSON.parse(functionArgs));
-
-        // PUSH THE TOOL CALL MESSAGE INTO MESSAGES ARRAY
-        messages.push({
-          tool_call_id: tool.id,
-          role: "tool",
-          name: functionName,
-          content: toolResult,
-        });
-      }
-    }
-  }
-}
-
-async function webSearch({ query }) {
-  console.log("Calling a web search...");
-
-  const response = await tvly.search(query);
-
-  const finalResult = response.results
-    .map((result) => result.content)
-    .join("\n\n");
-
-  return finalResult;
-}
-```
-
-**Here is the Final output:**
-
-<img src="./assets/chat-with-memory.png" width="500px">
 
 ---
 
@@ -1283,13 +1101,6 @@ That’s an **AI Agent** — taking **actions**, not just generating answers.
 | **Memory**               | Remembers past actions and outcomes         | Learns your preferred airline or seat type         |
 | **Collaboration**        | Can work with other AI agents               | One agent books flight, another arranges transport |
 
-### Why Agentic AI is the Future
-
-- Reduces human workload
-- Automates multi-step complex workflows
-- Can collaborate with humans and other AI systems
-- A key building block for **Artificial General Intelligence (AGI)**
-
 ---
 
 ## 20. LangChain Vs LangGraph
@@ -1329,23 +1140,9 @@ In short:
 It’s inspired by computational graphs — where each “node” is a step (LLM, Tool, Decision, etc.)
 and data moves between these nodes.
 
-### ✅ When to Use LangGraph
-
-- When building autonomous agents that:
-
-  - Think, plan, and act in loops.
-  - Maintain state across multiple decisions.
-  - Need multi-agent collaboration.
-
-- When you want fine-grained control over flow, memory, and retries.
-
-## 21. Why LangGraph?
-
-[Here is the official Documentation.](https://langchain-ai.github.io/langgraphjs/concepts/high_level/)
-
 ---
 
-## 22. ReAct Agent — The Foundation of Agentic AI
+## 21. ReAct Agent — The Foundation of Agentic AI
 
 **ReAct** stands for **Reasoning + Acting**.
 
@@ -1404,26 +1201,6 @@ ReAct is a **game-changer** because it combines two critical abilities:
 
 ---
 
-### 🧩 Why ReAct is Important
-
-| Problem (in normal LLMs)           | How ReAct Solves It                            |
-| ---------------------------------- | ---------------------------------------------- |
-| LLMs can’t access real-time data   | ReAct agents can use tools like search or APIs |
-| LLMs sometimes hallucinate facts   | ReAct agents verify through observation        |
-| LLMs can’t take dynamic actions    | ReAct enables reasoning + action loop          |
-| LLMs are static after one response | ReAct can self-correct and iterate             |
-
-### 🌍 Real-World Use Cases
-
-| Use Case                      | Description                                                             |
-| ----------------------------- | ----------------------------------------------------------------------- |
-| 🔎 **Web Search Agent**       | Finds real-time information using ReAct reasoning loop                  |
-| 💬 **Customer Support Agent** | Looks up database info before answering                                 |
-| 📊 **Data Analyst Bot**       | Uses reasoning to choose which dataset or tool to query                 |
-| 🤖 **Multi-tool Assistant**   | Dynamically decides whether to call a calculator, API, or search engine |
-
----
-
 ## 🤖 Is ReAct Agent Still in Use Today?
 
 ## 🧩 Short Answer:
@@ -1442,8 +1219,6 @@ Instead, its **core idea (Reasoning + Acting loop)** is now **built inside moder
   - Use tools or APIs (Acting)
   - Learn from results (Observation)
 
-➡️ Example: LangChain used ReAct-style prompts to make LLMs “agents”.
-
 #### ⚙️ Now (Modern LLMs like GPT-4, GPT-5, Claude, Gemini)
 
 - Modern models already have **built-in ReAct-style capabilities**.
@@ -1453,14 +1228,5 @@ Instead, its **core idea (Reasoning + Acting loop)** is now **built inside moder
   - Chain thoughts and actions automatically
 
 So, the **ReAct logic is now baked inside** these models rather than needing manual prompting.
-
-### 🧠 How ReAct Still Matters
-
-Even though LLMs now do this internally, **ReAct remains the foundation** of:
-
-- Agent frameworks like **LangChain**, **LangGraph**, **CrewAI**
-- OpenAI’s **Assistants API (function calling loop)**
-- **Tool-using AI systems** (e.g., ChatGPT browsing mode)
-- **Autonomous agents** that plan multi-step workflows
 
 ---
