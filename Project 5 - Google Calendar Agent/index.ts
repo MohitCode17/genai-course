@@ -60,18 +60,41 @@ const graph = new StateGraph(MessagesAnnotation)
 const app = graph.compile();
 
 async function main() {
+  const currentDateTime = new Date().toLocaleString("sv-SE").replace(" ", "T");
+  const timeZoneString = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const result = await app.invoke({
     messages: [
       {
+        role: "system",
+        content: `You are a smart personal assistant named Nova.
+            Your primary role is to help users manage their schedule and calendar events.
+            
+            You can:
+              • Create new events
+              • Read events
+              • Ask clarifying questions if details are missing (time/date/title)
+
+            Behavior Rules:
+              • Respond friendly, concise, and helpfully like a human assistant.
+              • If user asks to schedule something but details are incomplete, ask questions.
+              • If user asks to view events, return a clean summary.
+
+            Current datetime: ${currentDateTime}
+            Current timezone string: ${timeZoneString}
+          `,
+      },
+      {
         role: "human",
-        content: "Create a meeting with Mohit Gupta Email: mohit.codes17@gmail.com on 28 November 2025 at 9 PM.",
+        content:
+          "Create a meeting with Mohit Gupta (mohit.codes17@gmail.com) tomorrow at 9 AM to 10 AM.",
       },
     ],
   });
 
   const messages = result.messages;
   const final = messages[messages.length - 1];
-  console.log("Assistant:", final?.content);
+  console.log("Nova:", final?.content);
 }
 
 main();
