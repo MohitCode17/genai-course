@@ -1,9 +1,17 @@
 import readline from "node:readline/promises";
 import { ChatGroq } from "@langchain/groq";
 import { createEventTool, getEventsTool } from "./tools";
-import { END, MessagesAnnotation, StateGraph } from "@langchain/langgraph";
+import {
+  END,
+  MemorySaver,
+  MessagesAnnotation,
+  StateGraph,
+} from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import type { AIMessage } from "@langchain/core/messages";
+
+// Memory
+const checkpointer = new MemorySaver();
 
 const tools: any = [createEventTool, getEventsTool];
 
@@ -56,9 +64,11 @@ const graph = new StateGraph(MessagesAnnotation)
   });
 
 // To Make Graph Runnable
-const app = graph.compile();
+const app = graph.compile({ checkpointer });
 
 async function main() {
+  let config = { configurable: { thread_id: "1" } };
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -76,11 +86,12 @@ async function main() {
       .replace(" ", "T");
     const timeZoneString = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const result = await app.invoke({
-      messages: [
-        {
-          role: "system",
-          content: `You are a smart personal assistant named Nova.
+    const result = await app.invoke(
+      {
+        messages: [
+          {
+            role: "system",
+            content: `You are a smart personal assistant named Nova.
             Your primary role is to help users manage their schedule and calendar events.
             
             You can:
@@ -96,13 +107,15 @@ async function main() {
             Current datetime: ${currentDateTime}
             Current timezone string: ${timeZoneString}
           `,
-        },
-        {
-          role: "human",
-          content: userInput,
-        },
-      ],
-    });
+          },
+          {
+            role: "human",
+            content: userInput,
+          },
+        ],
+      },
+      config
+    );
 
     const messages = result.messages;
     const final = messages[messages.length - 1];
