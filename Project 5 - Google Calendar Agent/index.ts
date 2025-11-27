@@ -64,7 +64,7 @@ async function main() {
     messages: [
       {
         role: "human",
-        content: "Can you create a meeting for tomorrow with Riyan Pandey at 9 PM?",
+        content: "Do i have any meeting for today?",
       },
     ],
   });
