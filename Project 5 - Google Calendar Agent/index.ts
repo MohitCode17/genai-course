@@ -64,7 +64,7 @@ async function main() {
     messages: [
       {
         role: "human",
-        content: "Do i have any meeting for today?",
+        content: "Create a meeting with Mohit Gupta Email: mohit.codes17@gmail.com on 28 November 2025 at 9 PM.",
       },
     ],
   });

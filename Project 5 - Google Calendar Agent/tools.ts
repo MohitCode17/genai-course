@@ -72,22 +72,76 @@ export const getEventsTool = tool(
   }
 );
 
+const createEventSchema = z.object({
+  summary: z.string().describe("The title of the event"),
+  start: z.object({
+    dateTime: z.string().describe("The date time of start of the event."),
+    timeZone: z.string().describe("Current IANA timezone string."),
+  }),
+  end: z.object({
+    dateTime: z.string().describe("The date time of end of the event."),
+    timeZone: z.string().describe("Current IANA timezone string."),
+  }),
+  attendees: z.array(
+    z.object({
+      email: z.string().describe("The email of the attendee"),
+      displayName: z.string().describe("Then name of the attendee."),
+    })
+  ),
+});
+
+type attendee = {
+  email: string;
+  displayName: string;
+};
+
+type EventData = {
+  summary: string;
+  start: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    dateTime: string;
+    timeZone: string;
+  };
+  attendees: attendee[];
+};
+
 export const createEventTool = tool(
-  async () => {
-    // GOOGLE CALENDAR LOGIC GOES HERE...
-    return "The meeting has been created";
+  async (eventData) => {
+    const { summary, start, end, attendees } = eventData as EventData;
+
+    const response = await calendar.events.insert({
+      calendarId: "mohitgupta1630.mg@gmail.com",
+      sendUpdates: "all",
+      conferenceDataVersion: 1,
+      requestBody: {
+        summary,
+        start,
+        end,
+        attendees,
+        conferenceData: {
+          createRequest: {
+            requestId: crypto.randomUUID(),
+            conferenceSolutionKey: {
+              type: "hangoutsMeet",
+            },
+          },
+        },
+      },
+    });
+    if (response.statusText === "OK") {
+      return "The meeting has been created.";
+    }
+
+    return "Couldn't create a meeting.";
   },
   // INFORMATION OF TOOL
   {
     name: "create-event",
     description: "Call to create the calendar event.",
     // SCHEMA TO VALIDATE THE QUERY
-    schema: z.object({
-      query: z
-        .string()
-        .describe(
-          "The query to be used to create events into google calendar."
-        ),
-    }),
+    schema: createEventSchema,
   }
 );
