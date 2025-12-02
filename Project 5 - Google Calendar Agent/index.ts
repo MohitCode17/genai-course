@@ -1,6 +1,6 @@
 import readline from "node:readline/promises";
 import { ChatGroq } from "@langchain/groq";
-import { createEventTool, getEventsTool } from "./tools";
+import { createEventTool, getEventsTool } from "./tools.ts";
 import {
   END,
   MemorySaver,
