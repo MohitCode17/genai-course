@@ -34,13 +34,15 @@ Otherwise, respond only with the word "RESPOND".`;
   const categorizationResponse = await model.invoke(
     [
       { role: "system", content: CATEGORIZATION_SYSTEM_PROMPT },
-      ...state.messages,
       /**
        * Don't be confused this is not a actual user prompt
        * who talk to agent
        * This is just trick to get Single Keyword
        */
+      // Include BOTH: user messages + agent response
+      ...state.messages,
       { role: "human", content: CATEGORIZATION_HUMAN_PROMPT },
+      supportResponse,
     ],
     {
       response_format: { type: "json_object" },
@@ -59,12 +61,26 @@ Otherwise, respond only with the word "RESPOND".`;
 
 function marketingSupport(state: typeof StateAnnotation.State) {
   // Logic for marketing support
+  console.log("Handling by marketing team...");
   return state;
 }
 
 function learningSupport(state: typeof StateAnnotation.State) {
   // Logic for marketing support
+  console.log("Handling by learning team...");
   return state;
+}
+
+function whoIsNext(state: typeof StateAnnotation.State) {
+  if (state.nextRepresentative.includes("MARKETING")) {
+    return "marketingSupport";
+  } else if (state.nextRepresentative.includes("LEARNING")) {
+    return "learningSupport";
+  } else if (state.nextRepresentative.includes("RESPOND")) {
+    return "__end__";
+  } else {
+    return "__end__";
+  }
 }
 
 /**
@@ -75,4 +91,33 @@ const graph = new StateGraph(StateAnnotation)
   .addNode("frontdeskSupport", frontdeskSupport)
   .addNode("marketingSupport", marketingSupport)
   .addNode("learningSupport", learningSupport)
-  .addEdge("__start__", "frontdeskSupport");
+  .addEdge("__start__", "frontdeskSupport")
+  .addEdge("marketingSupport", "__end__")
+  .addEdge("learningSupport", "__end__")
+  .addConditionalEdges("frontdeskSupport", whoIsNext, {
+    marketingSupport: "marketingSupport",
+    learningSupport: "learningSupport",
+    __end__: "__end__",
+  });
+
+const app = graph.compile();
+
+async function main() {
+  const stream = await app.stream({
+    messages: [
+      {
+        role: "human",
+        content:
+          "Can you provide me a valid syllabus for Web development course?",
+      },
+    ],
+  });
+
+  for await (const value of stream) {
+    console.log("-----STEP-----");
+    console.log(value);
+    console.log("-----STEP-----");
+  }
+}
+
+main();
