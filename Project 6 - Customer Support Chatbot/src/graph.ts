@@ -1,6 +1,15 @@
 import { StateGraph } from "@langchain/langgraph";
 import { StateAnnotation } from "./state";
 import { model } from "./model";
+import { getOffers } from "./tools";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import type { AIMessage } from "@langchain/core/messages";
+
+/**
+ * Marketing Tool
+ */
+const marketingTools = [getOffers];
+const marketingToolNode = new ToolNode(marketingTools);
 
 async function frontdeskSupport(state: typeof StateAnnotation.State) {
   const SYSTEM_PROMPT = `You are frontline support staff for Coder’s Gyan, an ed-tech company that helps software developers excel in their careers through practical web development and Generative AI courses.
@@ -59,10 +68,34 @@ Otherwise, respond only with the word "RESPOND".`;
   };
 }
 
-function marketingSupport(state: typeof StateAnnotation.State) {
-  // Logic for marketing support
-  console.log("Handling by marketing team...");
-  return state;
+async function marketingSupport(state: typeof StateAnnotation.State) {
+  /**
+   * Binding tools with marketing support agent
+   */
+  const llmWithTools = model.bindTools(marketingTools);
+
+  const SYSTEM_PROMPT = `You are part of the Marketing Team at Coder's Gyan, an ed-tech company that helps software developers excel in their careers through practical web development and Generative AI courses.
+You specialize in handling questions about promo codes, discounts, offers, and special campaigns.
+Answer clearly, concisely, and in a friendly manner. For queries outside promotions (course content, learning), politely redirect the student to the correct team.
+Important: Answer only using given context, else say I don't have enough information about it.`;
+
+  let trimmedHistory = state.messages;
+
+  if (trimmedHistory.at(-1)?.type === "ai") {
+    trimmedHistory = trimmedHistory.slice(0, -1); // [1, 2, 3] -> [1, 2]
+  }
+
+  const marketingResponse = await llmWithTools.invoke([
+    {
+      role: "system",
+      content: SYSTEM_PROMPT,
+    },
+    ...trimmedHistory,
+  ]);
+
+  return {
+    messages: [marketingResponse],
+  };
 }
 
 function learningSupport(state: typeof StateAnnotation.State) {
@@ -83,20 +116,34 @@ function whoIsNext(state: typeof StateAnnotation.State) {
   }
 }
 
+function isMarketingTool(state: typeof StateAnnotation.State) {
+  const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
+
+  if (lastMessage.tool_calls?.length) {
+    return "marketingTools";
+  }
+
+  return "__end__";
+}
+
 /**
  * Build the Graph
  */
-
 const graph = new StateGraph(StateAnnotation)
   .addNode("frontdeskSupport", frontdeskSupport)
   .addNode("marketingSupport", marketingSupport)
   .addNode("learningSupport", learningSupport)
+  .addNode("marketingTools", marketingToolNode)
   .addEdge("__start__", "frontdeskSupport")
-  .addEdge("marketingSupport", "__end__")
+  .addEdge("marketingTools", "marketingSupport")
   .addEdge("learningSupport", "__end__")
   .addConditionalEdges("frontdeskSupport", whoIsNext, {
     marketingSupport: "marketingSupport",
     learningSupport: "learningSupport",
+    __end__: "__end__",
+  })
+  .addConditionalEdges("marketingSupport", isMarketingTool, {
+    marketingTools: "marketingTools",
     __end__: "__end__",
   });
 
@@ -108,7 +155,7 @@ async function main() {
       {
         role: "human",
         content:
-          "Can you provide me a valid syllabus for Web development course?",
+          "Can i get any discount coupon?",
       },
     ],
   });
