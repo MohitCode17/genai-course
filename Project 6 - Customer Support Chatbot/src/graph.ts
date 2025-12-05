@@ -1,3 +1,4 @@
+import readline from "node:readline/promises";
 import { MemorySaver, StateGraph } from "@langchain/langgraph";
 import { StateAnnotation } from "./state";
 import { model } from "./model";
@@ -198,25 +199,37 @@ const graph = new StateGraph(StateAnnotation)
 const app = graph.compile({ checkpointer });
 
 async function main() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
   let config = { configurable: { thread_id: "1" } };
 
-  const stream = await app.stream(
-    {
-      messages: [
-        {
-          role: "human",
-          content: "What is the course duration of Fullstack (MERN)?",
-        },
-      ],
-    },
-    config
-  );
+  while (true) {
+    const query = await rl.question("You: ");
 
-  for await (const value of stream) {
-    console.log("-----STEP-----");
-    console.log(value);
-    console.log("-----STEP-----");
+    if (query === "/bye") {
+      break;
+    }
+
+    const result = await app.invoke(
+      {
+        messages: [
+          {
+            role: "human",
+            content: query,
+          },
+        ],
+      },
+      config
+    );
+
+    console.log(
+      "Assistant:",
+      result.messages[result.messages.length - 1]?.content
+    );
   }
+  rl.close();
 }
 
 main();
