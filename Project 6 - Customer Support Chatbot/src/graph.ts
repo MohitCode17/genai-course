@@ -1,9 +1,12 @@
-import { StateGraph } from "@langchain/langgraph";
+import { MemorySaver, StateGraph } from "@langchain/langgraph";
 import { StateAnnotation } from "./state";
 import { model } from "./model";
 import { getOffers, kbRetrieverTool } from "./tools";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import type { AIMessage } from "@langchain/core/messages";
+
+// Memory
+const checkpointer = new MemorySaver();
 
 /**
  * Marketing Tool
@@ -192,17 +195,22 @@ const graph = new StateGraph(StateAnnotation)
     __end__: "__end__",
   });
 
-const app = graph.compile();
+const app = graph.compile({ checkpointer });
 
 async function main() {
-  const stream = await app.stream({
-    messages: [
-      {
-        role: "human",
-        content: "What is the course duration of Fullstack (MERN)?",
-      },
-    ],
-  });
+  let config = { configurable: { thread_id: "1" } };
+
+  const stream = await app.stream(
+    {
+      messages: [
+        {
+          role: "human",
+          content: "What is the course duration of Fullstack (MERN)?",
+        },
+      ],
+    },
+    config
+  );
 
   for await (const value of stream) {
     console.log("-----STEP-----");
