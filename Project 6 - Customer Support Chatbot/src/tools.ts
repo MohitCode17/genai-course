@@ -1,4 +1,6 @@
 import { tool } from "@langchain/core/tools";
+import { vectorStore } from "./indexDocs";
+import z from "zod";
 
 export const getOffers = tool(
   () => {
@@ -20,3 +22,12 @@ export const getOffers = tool(
     description: "Call this tool to get the available discounts and offers",
   }
 );
+
+const retriever = vectorStore.asRetriever();
+
+export const kbRetrieverTool = retriever.asTool({
+  name: "retrieve_learning_knowledge_base",
+  description:
+    "Search and return information about syllabus, courses, FAQs, career doubts.",
+  schema: z.string().describe("The user query to search in the knowledge base"),
+});

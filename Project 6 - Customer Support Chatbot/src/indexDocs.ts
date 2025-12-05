@@ -43,4 +43,4 @@ export async function indexTheDocument(filePath: string) {
   console.log("Done");
 }
 
-indexTheDocument("../cg-knowledge-base.pdf");
+// indexTheDocument("../cg-knowledge-base.pdf");
