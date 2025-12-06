@@ -5,6 +5,7 @@
     "": {
       "name": "project-7---linkedin-post-writer-agent",
       "dependencies": {
+        "@langchain/core": "^1.1.4",
         "@langchain/groq": "^1.0.2",
         "@langchain/langgraph": "^1.0.4",
       },
