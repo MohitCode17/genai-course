@@ -4,6 +4,6 @@ import { ChatGroq } from "@langchain/groq";
  * Initialize the LLM
  */
 export const model = new ChatGroq({
-  model: "openai/gpt-oss-120b",
+  model: "llama-3.3-70b-versatile",
   temperature: 0,
 });

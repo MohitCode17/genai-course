@@ -1,7 +1,7 @@
 import { StateGraph } from "@langchain/langgraph";
 import { StateAnnotation } from "./state";
 import { model } from "./model";
-import { HumanMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
 async function writer(state: typeof StateAnnotation.State) {
   const SYSTEM_PROMPT = `You are a LinkedIn writing assistant for beginner devs (0–2 years).
@@ -31,7 +31,7 @@ async function writer(state: typeof StateAnnotation.State) {
 }
 
 async function critique(state: typeof StateAnnotation.State) {
-  const SYSTEM_PROMPT = `You are a tough LinkedIn editor for beginner devs. Priority: remove buzzwords/cliches; keet it clean, specific, and relatable
+  const SYSTEM_PROMPT = `You are a LinkedIn post critique. Your task is to give feedback on the previously generated post by the writer agent.
 
 Check against:
 1) Strong hook in 1–2 lines
@@ -39,36 +39,52 @@ Check against:
 3) Specific insights and concrete examples (not generic advice)
 4) Skimmable formatting (short lines, whitespace)
 5) Clear CTA to follow for more
-6) 160–220 words, not more than 2 emojis, authentic tone, no buzzwords, no controversy
+6) 160–220 words, no emojis, authentic tone, no buzzwords, no controversy
 
 Output format (no scores, no questions, no meta):
 Start with exactly:
 "Revise now. Apply ALL changes below. Output only the revised post text."
+Then list ONLY bullet-point FIXES (edit instructions). Do NOT include any rewritten sentences or paragraphs. Do NOT write the post.
 
-Then list bullet-point FIXES that are direct edit instructions (e.g., "Trim intro to 2 lines with pain-point hook", "Replace 'leverage/impactful' with simple verbs", "Add 1 analogy for <term>", "End with CTA: 'Follow for more bite-sized dev tips'")`;
+Return only the fixes.`;
+
+  /**
+   * Gives only latest message, to make context clear and save tokens
+   */
+  const lastMessage = [...state.messages]
+    .reverse()
+    .find((m) => m.type === "ai");
 
   const response = await model.invoke([
     {
       role: "system",
       content: SYSTEM_PROMPT,
     },
-    ...state.messages,
+    lastMessage as AIMessage,
   ]);
 
   /**
    * This line forces critique output to look like a human instruction.
    */
-  return { messages: [new HumanMessage(response.content)] };
+  return {
+    messages: [new HumanMessage(response.content)],
+    revisions: state.revisions ? state.revisions + 1 : 1,
+  };
 }
 
 function shouldContinue(state: typeof StateAnnotation.State) {
-  // logic for redirect
+  if (state.revisions >= 2) {
+    return "__end__";
+  }
   return "critique";
 }
 
-const graph = new StateGraph(StateAnnotation)
+export const graph = new StateGraph(StateAnnotation)
   .addNode("writer", writer)
   .addNode("critique", critique)
   .addEdge("__start__", "writer")
   .addEdge("critique", "writer")
-  .addConditionalEdges("writer", shouldContinue, {});
+  .addConditionalEdges("writer", shouldContinue, {
+    __end__: "__end__",
+    critique: "critique",
+  });
