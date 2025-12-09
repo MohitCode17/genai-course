@@ -93,7 +93,7 @@ References:
   };
 }
 
-const graph = new StateGraph(graphState)
+export const graph = new StateGraph(graphState)
   .addNode("responder", responder)
   .addNode("searchExecutor", searchExecutor)
   .addNode("revisor", revisor)
