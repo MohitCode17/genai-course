@@ -20,4 +20,5 @@ export type QuestionAnswer = z.infer<typeof questionAnswerSchema>;
 
 export const graphState = Annotation.Root({
   ...MessagesAnnotation.spec,
+  iteration: Annotation<number>,
 });
