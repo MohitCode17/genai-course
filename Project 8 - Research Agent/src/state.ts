@@ -16,6 +16,8 @@ export const questionAnswerSchema = z.object({
     ),
 });
 
+export type QuestionAnswer = z.infer<typeof questionAnswerSchema>;
+
 export const graphState = Annotation.Root({
   ...MessagesAnnotation.spec,
 });
