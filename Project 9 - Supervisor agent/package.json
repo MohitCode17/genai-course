@@ -1,0 +1,17 @@
+{
+  "name": "project-9---supervisor-agent",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@langchain/groq": "^1.0.2",
+    "langchain": "^1.1.5",
+    "zod": "^4.1.13"
+  }
+}
