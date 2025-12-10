@@ -1,6 +1,7 @@
+import readline from "node:readline/promises";
 import { ChatGroq } from "@langchain/groq";
-import { createAgent } from "langchain";
-import { tool } from "langchain";
+import { MemorySaver } from "@langchain/langgraph";
+import { createAgent, tool } from "langchain";
 import { z } from "zod";
 
 /**
@@ -147,23 +148,133 @@ const contactAgent = createAgent({
   systemPrompt: CONTACT_AGENT_PROMPT,
 });
 
-async function main() {
-  const query = `Schedule a team meeting next Tuesday at 2pm for 1 hour.
-    there is no attendees for now, and use all default settings. Just create an event.`;
+/**
+ * 👉 Wrap sub-agents as tools
+ */
 
-  const stream = await calendarAgent.stream({
-    messages: [{ role: "user", content: query }],
+const scheduleEvent = tool(
+  async ({ request }) => {
+    const result = await calendarAgent.invoke({
+      messages: [{ role: "user", content: request }],
+    });
+    const lastMessage = result.messages[result.messages.length - 1];
+    return lastMessage?.text;
+  },
+  {
+    name: "schedule_event",
+    description: `
+Schedule calendar events using natural language.
+
+Use this when the user wants to create, modify, or check calendar appointments.
+Handles date/time parsing, availability checking, and event creation.
+
+Input: Natural language scheduling request (e.g., 'meeting with design team next Tuesday at 2pm')
+    `.trim(),
+    schema: z.object({
+      request: z.string().describe("Natural language scheduling request"),
+    }),
+  }
+);
+
+const manageEmail = tool(
+  async ({ request }) => {
+    const result = await emailAgent.invoke({
+      messages: [{ role: "user", content: request }],
+    });
+    const lastMessage = result.messages[result.messages.length - 1];
+    return lastMessage?.text;
+  },
+  {
+    name: "manage_email",
+    description: `
+Send emails using natural language.
+
+Use this when the user wants to send notifications, reminders, or any email communication.
+Handles recipient extraction, subject generation, and email composition.
+
+Input: Natural language email request (e.g., 'send them a reminder about the meeting')
+    `.trim(),
+    schema: z.object({
+      request: z.string().describe("Natural language email request"),
+    }),
+  }
+);
+
+const manageContacts = tool(
+  async ({ request }) => {
+    const result = await contactAgent.invoke({
+      messages: [{ role: "user", content: request }],
+    });
+    const lastMessage = result.messages[result.messages.length - 1];
+    return lastMessage?.text;
+  },
+  {
+    name: "manage_contacts",
+    description: `
+Get contacts using natural language.
+
+Use this when the user wants to get list of contacts or even single contact.
+
+Input: Natural language contact request (e.g., 'give me all contacts for design team.')
+    `.trim(),
+    schema: z.object({
+      request: z.string().describe("Natural language contact list request"),
+    }),
+  }
+);
+
+/**
+ * Create a Supervisor Agent
+ */
+const SUPERVISOR_PROMPT = `
+You are a helpful personal assistant.
+You can schedule calendar events and send emails.
+To send emails/notifications, first call the manage_contacts tool to get email addresses.
+Break down user requests into appropriate tool calls and coordinate the results.
+When a request involves multiple actions, use multiple tools in sequence. Make sure to call the tools in correct order.
+`.trim();
+
+const supervisorAgent = createAgent({
+  model: llm,
+  tools: [scheduleEvent, manageEmail, manageContacts],
+  systemPrompt: SUPERVISOR_PROMPT,
+  checkpointer: new MemorySaver(),
+});
+
+/**
+ * Main - Calling the llm
+ */
+async function main() {
+  const config = { configurable: { thread_id: "1" } };
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
 
-  for await (const step of stream) {
-    for (const update of Object.values(step)) {
-      if (update && typeof update === "object" && "messages" in update) {
-        for (const message of update.messages) {
-          console.log(message.toFormattedString());
+  while (true) {
+    const query = await rl.question("You: ");
+
+    if (query === "/bye") break;
+
+    const stream = await supervisorAgent.stream(
+      {
+        messages: [{ role: "user", content: query }],
+      },
+      config
+    );
+
+    for await (const step of stream) {
+      for (const update of Object.values(step)) {
+        if (update && typeof update === "object" && "messages" in update) {
+          for (const message of update.messages) {
+            console.log(message.toFormattedString());
+          }
         }
       }
     }
   }
+
+  rl.close();
 }
 
 main();
