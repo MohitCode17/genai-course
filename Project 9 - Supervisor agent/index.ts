@@ -1,7 +1,7 @@
 import readline from "node:readline/promises";
 import { ChatGroq } from "@langchain/groq";
 import { MemorySaver } from "@langchain/langgraph";
-import { createAgent, tool } from "langchain";
+import { createAgent, humanInTheLoopMiddleware, tool } from "langchain";
 import { z } from "zod";
 
 /**
@@ -132,6 +132,12 @@ const emailAgent = createAgent({
   model: llm,
   tools: [sendEmail],
   systemPrompt: EMAIL_AGENT_PROMPT,
+  middleware: [
+    humanInTheLoopMiddleware({
+      interruptOn: { send_email: true },
+      descriptionPrefix: "Outbound email pending approval",
+    }),
+  ],
 });
 
 // 👉 Contact Agent
@@ -244,7 +250,19 @@ const supervisorAgent = createAgent({
 /**
  * Main - Calling the llm
  */
+
+type Interruptvalue = {
+  actionRequests: {
+    description: string;
+  }[];
+
+  reviewConfigs: {
+    allowedDecisions: string[];
+  }[];
+};
+
 async function main() {
+  const interrupts: any[] = [];
   const config = { configurable: { thread_id: "1" } };
   const rl = readline.createInterface({
     input: process.stdin,
@@ -256,22 +274,47 @@ async function main() {
 
     if (query === "/bye") break;
 
-    const stream = await supervisorAgent.stream(
+    const result = await supervisorAgent.invoke(
       {
         messages: [{ role: "user", content: query }],
       },
       config
     );
 
-    for await (const step of stream) {
-      for (const update of Object.values(step)) {
-        if (update && typeof update === "object" && "messages" in update) {
-          for (const message of update.messages) {
-            console.log(message.toFormattedString());
-          }
-        }
-      }
+    let output = "";
+
+    if (result?.__interrupt__) {
+      interrupts.push(result.__interrupt__[0]);
+      // show the approval
+      output +=
+        (result.__interrupt__[0]?.value as Interruptvalue).actionRequests[0]
+          ?.description + "\n\n";
+
+      output += "Choose one option:\n\n";
+
+      output += (
+        result.__interrupt__[0]?.value as Interruptvalue
+      ).reviewConfigs[0]?.allowedDecisions
+        .map((decision, index) => `${index + 1}. ${decision}`)
+        .join("\n");
+
+      console.log(output);
+    } else {
+      console.log(
+        "Assistant: ",
+        result.messages[result.messages.length - 1]?.content
+      );
     }
+
+    // for await (const step of stream) {
+    //   for (const update of Object.values(step)) {
+    //     if (update && typeof update === "object" && "messages" in update) {
+    //       for (const message of update.messages) {
+    //         console.log(message.toFormattedString());
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   rl.close();
