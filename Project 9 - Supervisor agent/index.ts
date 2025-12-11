@@ -1,6 +1,6 @@
 import readline from "node:readline/promises";
 import { ChatGroq } from "@langchain/groq";
-import { MemorySaver } from "@langchain/langgraph";
+import { Command, MemorySaver } from "@langchain/langgraph";
 import { createAgent, humanInTheLoopMiddleware, tool } from "langchain";
 import { z } from "zod";
 
@@ -238,6 +238,7 @@ You can schedule calendar events and send emails.
 To send emails/notifications, first call the manage_contacts tool to get email addresses.
 Break down user requests into appropriate tool calls and coordinate the results.
 When a request involves multiple actions, use multiple tools in sequence. Make sure to call the tools in correct order.
+IMPORTANT: If the user rejects an email or action DO NOT recreate or retry. Simply acknowledge the rejection and the user what they would like to do instead. Do not attempt to send a modified version unless explicitly asked.
 `.trim();
 
 const supervisorAgent = createAgent({
@@ -262,8 +263,10 @@ type Interruptvalue = {
 };
 
 async function main() {
-  const interrupts: any[] = [];
+  let interrupts: any[] = [];
+
   const config = { configurable: { thread_id: "1" } };
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -274,12 +277,46 @@ async function main() {
 
     if (query === "/bye") break;
 
+    /*
+    if (actionRequest.name === "send_email") {
+      // Edit email
+      const editedAction = { ...actionRequest };
+      editedAction.arguments.subject = "Mockups reminder";
+      resume[interrupt.id] = {
+        decisions: [{ type: "edit", editedAction }],
+      };
+    } else {
+      resume[interrupt.id] = { decisions: [{ type: "approve" }] };
+    }
+    */
+    let resume: Record<string, any> = {};
+
+    if (interrupts.length) {
+      const interrupt = interrupts[0];
+
+      if (query === "2") {
+        // TODO: Handle Edit Logic
+        // SHOW USER THE PROMPT - ALL FIELDS
+        // WHAT TO EDIT
+      } else {
+        resume[interrupt.id] = {
+          decisions: [
+            { type: query === "1" ? "approve" : query === "3" ? "reject" : "" },
+          ],
+        };
+      }
+    }
+
     const result = await supervisorAgent.invoke(
-      {
-        messages: [{ role: "user", content: query }],
-      },
+      interrupts.length
+        ? new Command({ resume })
+        : {
+            messages: [{ role: "user", content: query }],
+          },
       config
     );
+
+    interrupts = [];
 
     let output = "";
 
