@@ -1,5 +1,12 @@
 import { ChatGroq } from "@langchain/groq";
 import type { MessagesAnnotation } from "@langchain/langgraph";
+import { initDB } from "./db";
+
+/**
+ * Initialize Database
+ */
+const database = initDB("./expenses.db");
+
 /**
  * INITIALIZE THE LLM
  */
