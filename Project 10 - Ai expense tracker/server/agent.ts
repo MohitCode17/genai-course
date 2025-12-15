@@ -1,8 +1,13 @@
 import { ChatGroq } from "@langchain/groq";
-import type { MessagesAnnotation } from "@langchain/langgraph";
+import {
+  MemorySaver,
+  MessagesAnnotation,
+  StateGraph,
+} from "@langchain/langgraph";
 import { initDB } from "./db";
 import { initTools } from "./tools";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
+import type { AIMessage } from "langchain";
 
 /**
  * Initialize Database
@@ -30,7 +35,7 @@ const toolNode = new ToolNode(tools);
 async function callModel(state: typeof MessagesAnnotation.State) {
   const llmWithTools = llm.bindTools(tools);
 
-  const response = llmWithTools.invoke([
+  const response = await llmWithTools.invoke([
     {
       role: "system",
       content: `You are a helpful expense tracking assistant. Current datetime: ${new Date().toISOString()}.
@@ -41,3 +46,52 @@ async function callModel(state: typeof MessagesAnnotation.State) {
 
   return { messages: [response] };
 }
+
+/**
+ * Build Graph
+ */
+
+function shouldContinue(state: typeof MessagesAnnotation.State) {
+  const messages = state.messages;
+  const lastMessage = messages.at(-1) as AIMessage;
+
+  if (lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+
+  return "__end__";
+}
+
+const graph = new StateGraph(MessagesAnnotation)
+  .addNode("callModel", callModel)
+  .addNode("tools", toolNode)
+  .addEdge("__start__", "callModel")
+  .addConditionalEdges("callModel", shouldContinue, {
+    tools: "tools",
+    __end__: "__end__",
+  });
+
+/**
+ * Complete Graph
+ */
+
+const agent = graph.compile({ checkpointer: new MemorySaver() });
+
+async function main() {
+  const response = await agent.invoke(
+    {
+      messages: [
+        {
+          role: "human",
+          content: "Bought my new iphone of rupees 85000 INR.",
+        },
+      ],
+    },
+    { configurable: { thread_id: "1" } }
+  );
+
+  // console.log(JSON.stringify(response, null, 2));
+  console.log(response.messages[response.messages.length - 1]?.content);
+}
+
+main();

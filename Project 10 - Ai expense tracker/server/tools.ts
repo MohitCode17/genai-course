@@ -8,7 +8,15 @@ export function initTools(database: Database) {
    */
   const addExpense = tool(
     ({ title, amount }) => {
-      console.log(title, amount);
+      // TODO: Do Proper args validations
+      const date = new Date().toISOString().split("T")[0]!;
+
+      // TODO: Add Error Handling
+      const stmt = database.prepare(
+        `INSERT INTO expenses (title, amount, date) VALUES (?, ?, ?)`
+      );
+
+      stmt.run(title, amount, date);
       return JSON.stringify({ status: "Success!" });
     },
     {
@@ -21,5 +29,5 @@ export function initTools(database: Database) {
     }
   );
 
-  return [addExpense]
+  return [addExpense];
 }
