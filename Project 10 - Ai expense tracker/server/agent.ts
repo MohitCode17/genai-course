@@ -19,7 +19,7 @@ const tools = initTools(database);
  * INITIALIZE THE LLM
  */
 const llm = new ChatGroq({
-  model: "llama-3.1-8b-instant",
+  model: "openai/gpt-oss-120b",
   temperature: 0,
 });
 
@@ -38,8 +38,13 @@ async function callModel(state: typeof MessagesAnnotation.State) {
   const response = await llmWithTools.invoke([
     {
       role: "system",
-      content: `You are a helpful expense tracking assistant. Current datetime: ${new Date().toISOString()}.
-      Call add_expense tool to add the expense to database.`,
+      content: `You are a helpful expense tracking assistant.
+      Rules:
+      - Call add_expense tool to add an expense to database
+      - NEVER add data on your own
+      - Call get_expenses tool to get the list of expenses for a given date range
+
+      Current datetime: ${new Date().toISOString()}`,
     },
     ...state.messages,
   ]);
@@ -69,7 +74,8 @@ const graph = new StateGraph(MessagesAnnotation)
   .addConditionalEdges("callModel", shouldContinue, {
     tools: "tools",
     __end__: "__end__",
-  });
+  })
+  .addEdge("tools", "callModel");
 
 /**
  * Complete Graph
@@ -83,15 +89,15 @@ async function main() {
       messages: [
         {
           role: "human",
-          content: "Bought my new iphone of rupees 85000 INR.",
+          content: "How much I have spent this week?",
         },
       ],
     },
-    { configurable: { thread_id: "1" } }
+    { configurable: { thread_id: crypto.randomUUID() } }
   );
 
-  // console.log(JSON.stringify(response, null, 2));
-  console.log(response.messages[response.messages.length - 1]?.content);
+  console.log(JSON.stringify(response, null, 2));
+  // console.log(response.messages[response.messages.length - 1]?.content);
 }
 
 main();
