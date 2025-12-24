@@ -1,11 +1,7 @@
-import "./App.css";
+import { ChatContainer } from "./components/ChatContainer";
 
 function App() {
-  return (
-    <>
-      <h1 className="text-2xl">Welcome to Expense Tracker</h1>
-    </>
-  );
+  return <ChatContainer />;
 }
 
 export default App;
