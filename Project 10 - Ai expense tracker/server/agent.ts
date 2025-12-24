@@ -7,7 +7,7 @@ import {
 import { initDB } from "./db";
 import { initTools } from "./tools";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import type { AIMessage } from "langchain";
+import type { AIMessage, ToolMessage } from "langchain";
 
 /**
  * Initialize Database
@@ -43,6 +43,7 @@ async function callModel(state: typeof MessagesAnnotation.State) {
       - Call add_expense tool to add an expense to database
       - NEVER add data on your own
       - Call get_expenses tool to get the list of expenses for a given date range
+      - Call generate_expense_chart tool only when user needs to visualize the expenses
 
       Current datetime: ${new Date().toISOString()}`,
     },
@@ -67,6 +68,19 @@ function shouldContinue(state: typeof MessagesAnnotation.State) {
   return "__end__";
 }
 
+function shouldCallModel(state: typeof MessagesAnnotation.State) {
+  const messages = state.messages;
+  const lastMessage = messages.at(-1) as ToolMessage;
+
+  const message = JSON.parse(lastMessage.content as string);
+
+  if (message.type === "chart") {
+    return "__end__";
+  }
+
+  return "callModel";
+}
+
 const graph = new StateGraph(MessagesAnnotation)
   .addNode("callModel", callModel)
   .addNode("tools", toolNode)
@@ -75,7 +89,10 @@ const graph = new StateGraph(MessagesAnnotation)
     tools: "tools",
     __end__: "__end__",
   })
-  .addEdge("tools", "callModel");
+  .addConditionalEdges("tools", shouldCallModel, {
+    callModel: "callModel",
+    __end__: "__end__",
+  });
 
 /**
  * Complete Graph
@@ -89,7 +106,8 @@ async function main() {
       messages: [
         {
           role: "human",
-          content: "How much I have spent this week?",
+          content:
+            "Can you visualize how much I spent this year group by month?",
         },
       ],
     },
