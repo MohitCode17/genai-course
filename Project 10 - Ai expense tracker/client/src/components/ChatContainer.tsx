@@ -1,7 +1,22 @@
+import { useEffect, useState } from "react";
 import { ChatInput } from "./ChatInput";
 
-const messages = [];
 export function ChatContainer() {
+  const [messages, setMessages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const evtSource = new EventSource("http://localhost:3001/chat");
+
+    evtSource.addEventListener("open", () => {
+      console.log("Connection opened");
+    });
+
+    evtSource.addEventListener("cgPing", (eventName) => {
+      console.log("Received event name: ", eventName.type);
+      setMessages((prev) => [...prev, eventName.data]);
+    });
+  }, []);
+
   return (
     <div className="flex flex-col h-screen w-full bg-zinc-950">
       {/* Header */}
@@ -105,7 +120,11 @@ export function ChatContainer() {
             </div>
           ) : (
             <div className="divide-y divide-zinc-800/50">
-              {/* Messages will be displayed here... */}
+              {messages.map((message, i) => (
+                <div className="text-white" key={i}>
+                  {message}
+                </div>
+              ))}
             </div>
           )}
         </div>
