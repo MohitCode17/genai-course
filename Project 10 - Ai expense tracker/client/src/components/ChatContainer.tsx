@@ -1,20 +1,35 @@
 import { useEffect, useState } from "react";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { ChatInput } from "./ChatInput";
 
 export function ChatContainer() {
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const evtSource = new EventSource("http://localhost:3001/chat");
+    async function submitQuery() {
+      await fetchEventSource("http://localhost:3001/chat", {
+        onmessage(ev) {
+          console.log(ev.data);
+        },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: "Hi" }),
+      });
+    }
 
-    evtSource.addEventListener("open", () => {
-      console.log("Connection opened");
-    });
+    submitQuery();
+    // const evtSource = new EventSource("http://localhost:3001/chat");
 
-    evtSource.addEventListener("cgPing", (eventName) => {
-      console.log("Received event name: ", eventName.type);
-      setMessages((prev) => [...prev, eventName.data]);
-    });
+    // evtSource.addEventListener("open", () => {
+    //   console.log("Connection opened");
+    // });
+
+    // evtSource.addEventListener("cgPing", (eventName) => {
+    //   console.log("Received event name: ", eventName.type);
+    //   setMessages((prev) => [...prev, eventName.data]);
+    // });
   }, []);
 
   return (

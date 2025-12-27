@@ -10,10 +10,14 @@ app.get("/", (req, res) => {
   res.json({ message: "ok" });
 });
 
-app.get("/chat", (req, res) => {
+app.post("/chat", (req, res) => {
   // SSE (SERVER SENT EVENTS)
   // 1. ADD SPECIAL HEADER
   // 2. SEND DATA IN SPECIAL FORMAT
+
+  const { query } = req.body;
+
+  console.log("Query", query);
 
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
