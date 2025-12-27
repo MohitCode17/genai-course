@@ -1,36 +1,26 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { ChatInput } from "./ChatInput";
 
 export function ChatContainer() {
   const [messages, setMessages] = useState<string[]>([]);
 
-  useEffect(() => {
-    async function submitQuery() {
-      await fetchEventSource("http://localhost:3001/chat", {
-        onmessage(ev) {
-          console.log(ev.data);
-        },
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query: "Hi" }),
-      });
-    }
+  async function submitQuery(userInput: string) {
+    await fetchEventSource("http://localhost:3001/chat", {
+      onmessage(ev) {
+        console.log(ev.data);
+      },
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: userInput }),
+    });
+  }
 
-    submitQuery();
-    // const evtSource = new EventSource("http://localhost:3001/chat");
-
-    // evtSource.addEventListener("open", () => {
-    //   console.log("Connection opened");
-    // });
-
-    // evtSource.addEventListener("cgPing", (eventName) => {
-    //   console.log("Received event name: ", eventName.type);
-    //   setMessages((prev) => [...prev, eventName.data]);
-    // });
-  }, []);
+  const onSubmit = (userInput: string) => {
+    submitQuery(userInput);
+  };
 
   return (
     <div className="flex flex-col h-screen w-full bg-zinc-950">
@@ -147,7 +137,7 @@ export function ChatContainer() {
 
       {/* Input Area */}
       <div className="shrink-0 w-full">
-        <ChatInput />
+        <ChatInput onSubmit={onSubmit} />
       </div>
     </div>
   );

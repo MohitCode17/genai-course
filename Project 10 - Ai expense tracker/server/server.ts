@@ -17,15 +17,13 @@ app.post("/chat", (req, res) => {
 
   const { query } = req.body;
 
-  console.log("Query", query);
-
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
   });
 
   setInterval(() => {
     res.write("event: cgPing\n");
-    res.write("data: Happy coding\n\n");
+    res.write(`data: ${query}\n\n`);
   }, 1000);
 
   //   res.json({});
