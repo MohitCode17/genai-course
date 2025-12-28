@@ -98,24 +98,4 @@ const graph = new StateGraph(MessagesAnnotation)
  * Complete Graph
  */
 
-const agent = graph.compile({ checkpointer: new MemorySaver() });
-
-async function main() {
-  const response = await agent.invoke(
-    {
-      messages: [
-        {
-          role: "human",
-          content:
-            "Can you visualize how much I spent this year group by month?",
-        },
-      ],
-    },
-    { configurable: { thread_id: crypto.randomUUID() } }
-  );
-
-  console.log(JSON.stringify(response, null, 2));
-  // console.log(response.messages[response.messages.length - 1]?.content);
-}
-
-main();
+export const agent = graph.compile({ checkpointer: new MemorySaver() });
