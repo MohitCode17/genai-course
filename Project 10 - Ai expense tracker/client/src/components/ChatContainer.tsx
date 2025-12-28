@@ -2,13 +2,36 @@ import { useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { ChatInput } from "./ChatInput";
 
+export type StreamMessage =
+  | {
+      type: "ai";
+      payload: { text: string };
+    }
+  | {
+      type: "toolCall:start";
+      payload: {
+        name: string;
+        args: Record<string, any>;
+      };
+    }
+  | {
+      type: "tool";
+      payload: {
+        name: string;
+        result: Record<string, any>;
+      };
+    };
+
 export function ChatContainer() {
   const [messages, setMessages] = useState<string[]>([]);
 
   async function submitQuery(userInput: string) {
     await fetchEventSource("http://localhost:3001/chat", {
       onmessage(ev) {
-        console.log(ev.data);
+        // console.log(ev.data);
+        const parsedData = JSON.parse(ev.data) as StreamMessage;
+
+        console.log(parsedData);
       },
       method: "POST",
       headers: {
