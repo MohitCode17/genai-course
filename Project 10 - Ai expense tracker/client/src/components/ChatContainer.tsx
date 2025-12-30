@@ -31,7 +31,33 @@ export function ChatContainer() {
         // console.log(ev.data);
         const parsedData = JSON.parse(ev.data) as StreamMessage;
 
-        console.log(parsedData);
+        if (parsedData.type === "ai") {
+          setMessages((prevMessages) => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+
+            if (lastMessage && lastMessage.type === "ai") {
+              // Append to last Message
+              const clonedMessages = [...prevMessages];
+
+              clonedMessages[clonedMessages.length - 1] = {
+                ...lastMessage,
+                payload: {
+                  text: lastMessage.payload.text + parsedData.payload.text,
+                },
+              };
+              return clonedMessages;
+            } else {
+              return [
+                ...prevMessages,
+                {
+                  id: Date.now().toString(),
+                  type: "ai",
+                  payload: parsedData.payload,
+                },
+              ];
+            }
+          });
+        }
       },
       method: "POST",
       headers: {
