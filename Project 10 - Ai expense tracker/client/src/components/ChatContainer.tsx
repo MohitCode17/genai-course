@@ -1,31 +1,31 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { ChatInput } from "./ChatInput";
-
-export type StreamMessage =
-  | {
-      type: "ai";
-      payload: { text: string };
-    }
-  | {
-      type: "toolCall:start";
-      payload: {
-        name: string;
-        args: Record<string, any>;
-      };
-    }
-  | {
-      type: "tool";
-      payload: {
-        name: string;
-        result: Record<string, any>;
-      };
-    };
+import ChatMessage from "./ChatMessage";
+import type { StreamMessage } from "../types";
 
 export function ChatContainer() {
-  const [messages, setMessages] = useState<string[]>([]);
+  const messageEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<StreamMessage[]>([]);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   async function submitQuery(userInput: string) {
+    setMessages((prevMessage) => {
+      return [
+        ...prevMessage,
+        {
+          id: Date.now().toString(),
+          type: "user",
+          payload: { text: userInput },
+        },
+      ];
+    });
+
     await fetchEventSource("http://localhost:3001/chat", {
       onmessage(ev) {
         // console.log(ev.data);
@@ -148,11 +148,16 @@ export function ChatContainer() {
             </div>
           ) : (
             <div className="divide-y divide-zinc-800/50">
-              {messages.map((message, i) => (
-                <div className="text-white" key={i}>
-                  {message}
-                </div>
-              ))}
+              {/* Messages will be displayed here... */}
+              {messages.map((message) => {
+                return (
+                  <div key={message.id}>
+                    <ChatMessage message={message} />
+                  </div>
+                );
+              })}
+
+              <div ref={messageEndRef} />
             </div>
           )}
         </div>
