@@ -3,11 +3,13 @@ import {
   MemorySaver,
   MessagesAnnotation,
   StateGraph,
+  type LangGraphRunnableConfig,
 } from "@langchain/langgraph";
 import { initDB } from "./db";
 import { initTools } from "./tools";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import type { AIMessage, ToolMessage } from "langchain";
+import type { StreamMessage } from "./types";
 
 /**
  * Initialize Database
@@ -57,11 +59,24 @@ async function callModel(state: typeof MessagesAnnotation.State) {
  * Build Graph
  */
 
-function shouldContinue(state: typeof MessagesAnnotation.State) {
+function shouldContinue(
+  state: typeof MessagesAnnotation.State,
+  config: LangGraphRunnableConfig
+) {
   const messages = state.messages;
   const lastMessage = messages.at(-1) as AIMessage;
 
   if (lastMessage.tool_calls?.length) {
+    // Send Custom Event
+    const customMessage: StreamMessage = {
+      type: "toolCall:start",
+      payload: {
+        name: lastMessage.tool_calls[0]?.name!,
+        args: lastMessage.tool_calls[0]?.args!,
+      },
+    };
+
+    config.writer!(customMessage);
     return "tools";
   }
 
