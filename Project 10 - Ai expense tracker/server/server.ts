@@ -40,11 +40,11 @@ app.post("/chat", async (req, res) => {
   );
 
   for await (const [eventType, chunk] of response) {
-    console.log("eventtype: ", eventType);
+    // console.log("eventtype: ", eventType);
     let message: StreamMessage = {} as StreamMessage;
 
     if (eventType === "custom") {
-      console.log("chunk", chunk);
+      // console.log("chunk", chunk);
       message = chunk;
     } else if (eventType === "messages") {
       if (chunk[0].content === "") continue;

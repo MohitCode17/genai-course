@@ -1,4 +1,4 @@
-import { User } from "lucide-react";
+import { User, Wrench } from "lucide-react";
 import type { StreamMessage } from "../types";
 
 type Props = {
@@ -46,6 +46,27 @@ const ChatMessage = ({ message }: Props) => {
           <div className="text-sm font-medium text-zinc-300">AI Assistant</div>
           <div className="text-zinc-100 whitespace-pre-wrap wrap-break-word leading-7">
             {message.payload.text}
+          </div>
+        </div>
+      </div>
+    );
+  } else if (message.type === "toolCall:start") {
+    return (
+      <div className="flex gap-4 py-4 px-6">
+        <div className="shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-zinc-700 flex items-center justify-center">
+            <Wrench color="gray" />
+          </div>
+        </div>
+        <div className="flex-1 space-y-2">
+          <div className="text-sm text-zinc-400 italic">
+            Using tool:{" "}
+            <span className="text-purple-400 font-medium">
+              {message.payload.name}
+            </span>
+          </div>
+          <div className="text-xs text-zinc-300 bg-purple-900/15 rounded-lg p-3 font-mono whitespace-pre-wrap">
+            {JSON.stringify(message.payload.args, null, 2)}
           </div>
         </div>
       </div>
