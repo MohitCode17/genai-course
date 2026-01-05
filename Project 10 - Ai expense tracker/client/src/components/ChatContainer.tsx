@@ -68,6 +68,17 @@ export function ChatContainer() {
               },
             ];
           });
+        } else if (parsedData.type === "tool") {
+          setMessages((prevMessages) => {
+            return [
+              ...prevMessages,
+              {
+                id: Date.now().toString(),
+                type: "tool",
+                payload: parsedData.payload,
+              },
+            ];
+          });
         }
       },
       method: "POST",
